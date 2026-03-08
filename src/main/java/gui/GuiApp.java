@@ -119,7 +119,7 @@ public class GuiApp {
 
         BorderPane root = new BorderPane();
         root.setCenter(center);
-        root.setBottom(printToFile);
+//      root.setBottom(printToFile);
         BorderPane.setAlignment(printToFile, Pos.CENTER_RIGHT);
         BorderPane.setMargin(printToFile, new Insets(8));
 
