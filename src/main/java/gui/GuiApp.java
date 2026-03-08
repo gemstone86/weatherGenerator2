@@ -62,7 +62,7 @@ public class GuiApp {
 
         Label areaLabel = new Label("Area:");
         HBox areaBox = new HBox(8, areaLabel, dropDownNations);
-        areaBox.setAlignment(Pos.CENTER_LEFT);
+        areaBox.setAlignment(Pos.CENTER);
 
         // ── Display fields ────────────────────────────────────────────────
         TextField displayYear  = new TextField(String.valueOf(year));
