@@ -1,0 +1,95 @@
+name: "Amdai-Shek (Norra)"
+
+temperature:
+  jan: -29
+  feb: -22
+  mar: -16
+  apr: -12
+  may: -7
+  jun: 3
+  jul: 9
+  aug: 16
+  sep: 12
+  oct: 6
+  nov: 1
+  dec: -12
+
+precipitation:
+  jan: 0
+  feb: 0
+  mar: 0
+  apr: 0
+  may: 0
+  jun: 0
+  jul: 0
+  aug: 0
+  sep: 0
+  oct: 1
+  nov: 1
+  dec: 1
+
+shift: 0
+
+wind:
+  jan: 1
+  feb: 1
+  mar: 1
+  apr: 1
+  may: 1
+  jun: 1
+  jul: 1
+  aug: 1
+  sep: 1
+  oct: 1
+  nov: 1
+  dec: 1
+
+events:
+  - name: "Dragon"
+    occurs: 1
+    days: 1000
+  - name: "Starka vindar (+1 vindstyrka, +3 alstra pneumotropi)"
+    occurs: 1
+    days: 28
+  - name: "Isande Kyla (-5C temperatur)"
+    occurs: 1
+    days: 50
+  - name: "Kryotropiskt Lågtryck (-10C temperatur)"
+    occurs: 1
+    days: 100
+  - name: "Djupt Mörker (+3 Alstra Skototropi)"
+    occurs: 1
+    days: 28
+  - name: "Kryotropisk Magistorm"
+    occurs: 1
+    days: 45
+  - name: "Raunisk Räd"
+    occurs: 1
+    days: 60
+  - name: "Verdisk Räd"
+    occurs: 1
+    days: 120
+  - name: "Kryotropisk Magistorm (Styrka 5)"
+    occurs: 1
+    days: 100
+  - name: "Kryotropisk Magistorm (Styrka 10)"
+    occurs: 1
+    days: 200
+  - name: "Kryotropisk Magistorm (Styrka 15)"
+    occurs: 1
+    days: 300
+  - name: "Kryotropisk Magistorm (Styrka 20)"
+    occurs: 1
+    days: 400
+  - name: "Fototropisk Magistorm (Styrka 5)"
+    occurs: 1
+    days: 100
+  - name: "Fototropisk Magistorm (Styrka 10)"
+    occurs: 1
+    days: 200
+  - name: "Fototropisk Magistorm (Styrka 15)"
+    occurs: 1
+    days: 300
+  - name: "Fototropisk Magistorm (Styrka 20)"
+    occurs: 1
+    days: 400

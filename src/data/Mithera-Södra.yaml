@@ -1,0 +1,65 @@
+name: "Mithera (Södra)"
+
+temperature:
+  jan: -26
+  feb: -22
+  mar: -17
+  apr: -12
+  may: -6
+  jun: 1
+  jul: 6
+  aug: 8
+  sep: 4
+  oct: -2
+  nov: -12
+  dec: -20
+
+precipitation:
+  jan: 0
+  feb: 0
+  mar: 0
+  apr: 0
+  may: 0
+  jun: 0
+  jul: 0
+  aug: 0
+  sep: 0
+  oct: 0
+  nov: 2
+  dec: 2
+
+shift: 0
+
+wind:
+  jan: 0
+  feb: 0
+  mar: 0
+  apr: 0
+  may: 0
+  jun: 0
+  jul: 0
+  aug: 0
+  sep: 0
+  oct: 0
+  nov: 0
+  dec: 0
+
+events:
+  - name: "Dragon"
+    occurs: 1
+    days: 1000
+  - name: "Skugglandsvarelser"
+    occurs: 1
+    days: 250
+  - name: "Kryotropisk Magistorm (Styrka 5)"
+    occurs: 1
+    days: 100
+  - name: "Kryotropisk Magistorm (Styrka 10)"
+    occurs: 1
+    days: 200
+  - name: "Kryotropisk Magistorm (Styrka 15)"
+    occurs: 1
+    days: 300
+  - name: "Kryotropisk Magistorm (Styrka 20)"
+    occurs: 1
+    days: 400
