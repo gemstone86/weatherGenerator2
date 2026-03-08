@@ -2,11 +2,13 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.Random;
 
+import gui.GuiApp;
 import javafx.application.Application;
 import javafx.stage.Stage;
-
-import gui.GuiApp;
-import weather.*;
+import weather.fileHandler;
+import weather.nationData;
+import weather.weather;
+import weather.weatherCalculator;
 
 public class main extends Application {
 

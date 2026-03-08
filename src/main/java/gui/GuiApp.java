@@ -1,5 +1,9 @@
 package gui;
 
+import java.text.DecimalFormat;
+import java.util.LinkedList;
+import java.util.Random;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -11,14 +15,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
 import weather.fileHandler;
 import weather.nationData;
-import weather.*;
-
-import java.text.DecimalFormat;
-import java.util.LinkedList;
-import java.util.Random;
+import weather.weather;
+import weather.weatherCalculator;
 
 public class GuiApp {
 
@@ -60,7 +60,7 @@ public class GuiApp {
         for (String n : listOfNations) dropDownNations.getItems().add(n);
         dropDownNations.getSelectionModel().selectFirst();
 
-        Label areaLabel = new Label("Area:");
+        Label areaLabel = new Label("Område:");
         HBox areaBox = new HBox(8, areaLabel, dropDownNations);
         areaBox.setAlignment(Pos.CENTER);
 
@@ -84,19 +84,19 @@ public class GuiApp {
         // ── Day controls ──────────────────────────────────────────────────
         Button dayUp   = new Button("+");
         Button dayDown = new Button("-");
-        HBox dayBox = new HBox(4, new Label("Day"), dayDown, displayDay, dayUp);
+        HBox dayBox = new HBox(4, new Label("Dag"), dayDown, displayDay, dayUp);
         dayBox.setAlignment(Pos.CENTER);
 
         // ── Month controls ────────────────────────────────────────────────
         Button monthUp   = new Button("+");
         Button monthDown = new Button("-");
-        HBox monthBox = new HBox(4, new Label("Month"), monthDown, displayMonth, monthUp);
+        HBox monthBox = new HBox(4, new Label("Månad"), monthDown, displayMonth, monthUp);
         monthBox.setAlignment(Pos.CENTER);
 
         // ── Year controls ─────────────────────────────────────────────────
         Button yearUp   = new Button("+");
         Button yearDown = new Button("-");
-        HBox yearBox = new HBox(4, new Label("Year"), yearDown, displayYear, yearUp);
+        HBox yearBox = new HBox(4, new Label("År"), yearDown, displayYear, yearUp);
         yearBox.setAlignment(Pos.CENTER);
 
         HBox dateControls = new HBox(16, dayBox, monthBox, yearBox);
@@ -104,8 +104,9 @@ public class GuiApp {
         dateControls.setPadding(new Insets(8));
 
         // ── Weather display ───────────────────────────────────────────────
-        Label weatherLabel = new Label("Weather");
-        VBox weatherDisplay = new VBox(4, weatherLabel, weatherData, otherEffects);
+        Label weatherLabel = new Label("Väder");
+        Label miscLabel = new Label("Övrigt");
+        VBox weatherDisplay = new VBox(4, weatherLabel, weatherData, miscLabel, otherEffects);
         weatherDisplay.setAlignment(Pos.CENTER_LEFT);
         weatherDisplay.setPadding(new Insets(8));
 
@@ -156,10 +157,10 @@ public class GuiApp {
         weather test = newCalc.getWeather(year, month, day, nationData);
         DecimalFormat df = new DecimalFormat("##");
 
-        String text = "Temp: " + df.format(test.getTemperature()) + "C"
-                + "   Wind: " + test.getWindStrength()
+        String text = "Temperatur: " + df.format(test.getTemperature()) + "C"
+                + "   Vindstyrka: " + test.getWindStrength()
                 + " (" + test.getDirection() + ")"
-                + "   Rain: " + test.getRain();
+                + "   Regnmängd: " + test.getRain();
 
         data.setText(text);
         other.setText(test.getOther());
