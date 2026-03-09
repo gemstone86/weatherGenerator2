@@ -1,14 +1,10 @@
 events:
-  - name: "Magistorm"
+  - name: "Magistorm (Grundkrafter 5)"
     occurs: 1
-    days: 365
+    days: 336
     bonus_wind: 0
     bonus_temp: 0
     bonus_rain: 0
-
-  - name: "Test"
-    occurs: 1
-    days: 2
 
   - name: "Åska"
     occurs: 1
@@ -73,10 +69,18 @@ events:
     bonus_wind: 0
     bonus_temp: 0
     bonus_rain: 0
+    max_temp: 10
 
   - name: "Komet"
     occurs: 1
     days: 300
+    bonus_wind: 0
+    bonus_temp: 0
+    bonus_rain: 0
+
+  - name: "Magistorm (Elementarkrafter 5)"
+    occurs: 1
+    days: 336
     bonus_wind: 0
     bonus_temp: 0
     bonus_rain: 0

@@ -22,38 +22,40 @@ public class Launcher extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        System.out.println("Step 0: Path is \"" + path + "\"");
+        Logger.log(LogLevel.INFO, 0, "Step 0: Path is \"" + path + "\"");
 
         // Convert .txt files to .yaml if no .yaml files exist yet
         String dataPath = path + "/src/data";
         File dataFolder = new File(dataPath);
         File[] yamlFiles = dataFolder.listFiles((dir, name) -> name.endsWith(".yaml"));
         if (yamlFiles == null || yamlFiles.length == 0) {
-            System.out.println("No YAML files found — converting .txt files...");
+        	Logger.log(LogLevel.INFO, 1, "No YAML files found — converting .txt files...");
             TxtToYamlConverter.convertAll(path);
         }
 
-        System.out.println("Step 1: Loading Data Files");
+        Logger.log(LogLevel.INFO, 0, "Step 1: Loading Data Files");
         fileHandler filehandler = new fileHandler(path);
 
-        System.out.println("Step 2: Loading Global Events");
+        Logger.log(LogLevel.INFO, 0, "Step 2: Loading Global Events");
         List<GlobalEvent> globalEvents = GlobalEventLoader.load(path);
-        System.out.println("\there " + globalEvents.size());
-        
-        System.out.println("Step 3: Opening Weather File");
+
+        Logger.log(LogLevel.INFO, 0, "Step 3: Opening Weather File");
         filehandler.createWeatherFile(nation, start_year, until_year);
 
-        System.out.println("Step 4: Setting up calculator");
+        Logger.log(LogLevel.INFO, 0, "Step 4: Setting up calculator");
         weatherCalculator calculator = new weatherCalculator(new Random(3118725));
         calculator.setGlobalEvents(globalEvents);
 
-        System.out.println("Step 5: Setting up data");
+        Logger.log(LogLevel.INFO, 0, "Step 5: Loading comments");
+        CommentHandler commentHandler = new CommentHandler(path);
+
+        Logger.log(LogLevel.INFO, 0, "Step 6: Setting up data");
         LinkedList<weather> list_of_weather = new LinkedList<weather>();
         filehandler.addToFile(filehandler.printHeader(), true);
         filehandler.closeWeatherFile();
 
-        System.out.println("Step 6: Starting JavaFX GUI");
-        new GuiApp(filehandler, list_of_weather, start_year, start_month, start_day, nation, primaryStage);
+        Logger.log(LogLevel.INFO, 0, "Step 7: Starting JavaFX GUI");
+        new GuiApp(filehandler, list_of_weather, start_year, start_month, start_day, nation, primaryStage, calculator, commentHandler);
     }
 
     public static void main(String[] args) {

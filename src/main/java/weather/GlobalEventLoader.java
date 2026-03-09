@@ -12,14 +12,15 @@ public class GlobalEventLoader {
 
     @SuppressWarnings("unchecked")
     public static List<GlobalEvent> load(String basePath) {
-        String path = basePath + "\\src\\additional-events.yaml";
-        File file = new File(path);
+        
+    	String path = basePath + "\\src\\additional-events.yaml";
+    	Logger.log(LogLevel.INFO, 2, "Additional-events path is: " + path);
+    	File file = new File(path);
         List<GlobalEvent> result = new ArrayList<>();
 
-        System.out.println("\tfile path is: " + path);
         
         if (!file.exists()) {
-            System.out.println("No additional-events.yaml found at " + path);
+        	Logger.log(LogLevel.WARNING, 0, "No additional-events.yaml found at " + path);
             return result;
         }
 
@@ -44,15 +45,15 @@ public class GlobalEventLoader {
                         startMonth, endMonth, minWind, maxWind,
                         bonusWind, bonusTemp, bonusRain));
                 
-                System.out.println(result.getLast().toString());
+                Logger.log(LogLevel.INFO, 2, result.getLast().toString());
             }
 
         } catch (IOException e) {
-            System.out.println("Error loading additional-events.yaml: " + e.getMessage());
+        	Logger.log(LogLevel.WARNING, 2, "Error loading additional-events.yaml: " + e.getMessage());
             e.printStackTrace();
         }
 
-        System.out.println("Loaded " + result.size() + " global events.");
+        Logger.log(LogLevel.INFO, 2, "Loaded " + result.size() + " global events.");
         return result;
     }
 

@@ -56,7 +56,7 @@ public class main2 extends Application {
         filehandler.closeWeatherFile();
 
         System.out.println("Step 5: Starting JavaFX GUI");
-        new GuiApp(filehandler, list_of_weather, start_year, start_month, start_day, nation, primaryStage);
+        //new GuiApp(filehandler, list_of_weather, start_year, start_month, start_day, nation, primaryStage, calculator);
     }
 
     public static void main(String[] args) {

@@ -34,10 +34,10 @@ wind:
   jan: 1
   feb: 1
   mar: 1
-  apr: 1
-  may: 1
-  jun: 1
-  jul: 1
+  apr: 0
+  may: 0
+  jun: 0
+  jul: 0
   aug: 1
   sep: 1
   oct: 1

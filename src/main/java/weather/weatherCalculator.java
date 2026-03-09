@@ -11,6 +11,8 @@ public class weatherCalculator {
     // Global events loaded from additional-events.yaml
     private List<GlobalEvent> globalEvents = new java.util.ArrayList<>();
 
+ //   private Logger logger = new Logger();
+    
     public weatherCalculator(Random rng) { this.rng = rng; }
 
     public void setGlobalEvents(List<GlobalEvent> events) {
@@ -18,7 +20,7 @@ public class weatherCalculator {
     }
 
     public void setSeed(int n) { rng.setSeed(n); }
-
+    
     public int obd6() {
         int die = rng.nextInt(6) + 1;
         if (die == 6) return obd6() + obd6();
@@ -26,7 +28,9 @@ public class weatherCalculator {
     }
 
     public int daySeed(int year, int month, int day) {
-        return year * 100 * 100 + month * 100 + day;
+        int sum = (year-1) * (12*28) + (month-1)*28 + day;
+    	Logger.log(LogLevel.DEBUG, 1, "Dayseed is: " + sum);
+    	return sum;
     }
 
     public int windStrengthNR(int windBonus) {
@@ -74,28 +78,35 @@ public class weatherCalculator {
     private int bonusRain() { int t = bonusRain; bonusRain = 0; return t; }
 
     public boolean chance(int occurs, int days) {
-        return rng.nextInt(days - 1) + 1 < occurs + 1;
+        try{
+        	return rng.nextInt(days - 1) + 1 < occurs + 1;
+        }
+        catch (Exception e) {
+        	System.out.println("event at " + days +"/"+occurs);
+        	return false;
+        }
     }
 
     /**
      * Generate events for this day using global events from YAML
      * and region-specific events from the nation data.
      */
-    public String generateEvents(LinkedList<event> regionEvents, int month, int wind) {
+    public String generateEvents(LinkedList<event> regionEvents, List<GlobalEvent> globalEvents, int month, int wind) {
         StringBuilder result = new StringBuilder();
 
-        System.out.println("\tNum of Global events " + globalEvents.size());
+        Logger.log(LogLevel.DEBUG, 2, "Num of Global events " + globalEvents.size());
         
         // Global events from additional-events.yaml
         for (GlobalEvent e : globalEvents) {
-            if (e.conditionsMet(month, wind) && chance(e.getOccurs(), e.getDays())) {
+            /*TODO: add a debug handler that prints when you need debug*/
+        	Logger.log(LogLevel.DEBUG, 2, "Checking event: " + e.getName());
+        	if (e.conditionsMet(month, wind) && chance(e.getOccurs(), e.getDays())) {
                 if(result.isEmpty()) {
                 	result.append(e.getName());
                 }
                 else {
                 	result.append(", ");
                 	result.append(e.getName());
-
                 }
             	
                 bonusWind += e.getBonusWind();
@@ -106,6 +117,7 @@ public class weatherCalculator {
 
         // Region-specific events from nation's yaml file
         for (event e : regionEvents) {
+        	Logger.log(LogLevel.DEBUG, 2, "Checking event: " + e.getName());
             if (chance(1 + e.getOccurs(), e.getDays())) {
                 if(result.isEmpty()) {
                 	result.append(e.getName());
@@ -141,7 +153,7 @@ public class weatherCalculator {
         rng.setSeed(daySeed(year, month, day));
 
         int wind = windStrengthNR(averageWind);
-        String events = generateEvents(nation.getEvents(), month, wind);
+        String events = generateEvents(nation.getEvents(), globalEvents, month, wind);
         double temperature = getProceduralTemperature(previous, average, next, day) + bonusTemp;
         bonusTemp = 0;
 

@@ -13,7 +13,7 @@ public class fileHandler {
 
     public fileHandler(String Path) {
         this.basePath = Path;
-        System.out.println("Here: " + basePath);
+        Logger.log(LogLevel.INFO, 2, "Path is: " + basePath);
         initializeDataFiles();
     }
 
@@ -90,7 +90,7 @@ public class fileHandler {
         }
 
         for (File f : files) {
-            System.out.println("    Loading: " + f.getName());
+        	Logger.log(LogLevel.INFO, 3, "Loading: " + f.getName());
             nationData nd = readYamlFile(f.getAbsolutePath());
             if (nd != null) listOfNations.add(nd);
         }
