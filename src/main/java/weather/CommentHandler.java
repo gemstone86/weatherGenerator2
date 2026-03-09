@@ -11,13 +11,13 @@ import java.util.Map;
 
 /**
  * Saves and loads day comments to/from comments.yaml
- * Keys are day seeds (integers), values are comment strings.
+ * Keys are date strings (e.g. "2977-7-1"), values are comment strings.
  */
 public class CommentHandler {
 
     private final String filePath;
     private GuiApp guiApp;
-    
+
     public CommentHandler(String basePath) {
         this.filePath = basePath + "/src/comments/comments.yaml";
     }
@@ -27,7 +27,7 @@ public class CommentHandler {
         HashMap<String, String> comments = new HashMap<>();
         File file = new File(filePath);
         this.guiApp = guiApp;
-        
+
         if (!file.exists()) {
             Logger.log(LogLevel.INFO, 1, "No comments file found, starting fresh.");
             return comments;
@@ -47,7 +47,7 @@ public class CommentHandler {
             }
             Logger.log(LogLevel.INFO, 1, "Loaded " + comments.size() + " comments.");
         } catch (IOException e) {
-        	Logger.log(LogLevel.WARNING, 1, "Error loading comments: " + e.getMessage());
+            Logger.log(LogLevel.WARNING, 1, "Error loading comments: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -55,22 +55,33 @@ public class CommentHandler {
     }
 
     public void save(HashMap<String, String> comments) {
-        // Only save non-empty comments
+        // Make sure current comment box content is saved before writing
         guiApp.oldComment();
-    	Map<String, String> toSave = new HashMap<>();
+
+        Map<String, String> toSave = new HashMap<>();
         for (Map.Entry<String, String> entry : comments.entrySet()) {
             if (entry.getValue() != null && !entry.getValue().trim().isEmpty()) {
                 toSave.put(entry.getKey(), entry.getValue());
             }
         }
 
+        // Create directory if it doesn't exist
+        File dir = new File(filePath).getParentFile();
+        if (!dir.exists()) dir.mkdirs();
+
         try {
-            Yaml yaml = new Yaml();
-            String output = yaml.dump(toSave);
-            Files.writeString(Path.of(filePath), output);
+            StringBuilder sb = new StringBuilder();
+            toSave.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(e -> sb
+                    .append(e.getKey())
+                    .append(": ")
+                    .append(e.getValue().replace("\n", " ").trim())
+                    .append("\n"));
+            Files.writeString(Path.of(filePath), sb.toString());
             Logger.log(LogLevel.INFO, 1, "Saved " + toSave.size() + " comments.");
         } catch (IOException e) {
-        	Logger.log(LogLevel.WARNING, 1, "Error saving comments: " + e.getMessage());
+            Logger.log(LogLevel.WARNING, 1, "Error saving comments: " + e.getMessage());
             e.printStackTrace();
         }
     }
