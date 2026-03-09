@@ -9,7 +9,7 @@ import javafx.stage.Stage;
 import gui.GuiApp;
 import weather.*;
 
-public class main extends Application {
+public class main2 extends Application {
 
     String path = Paths.get("").toAbsolutePath().toString();
 

@@ -48,7 +48,7 @@ events:
   - name: "Dragon"
     occurs: 1
     days: 1000
-  - name: "Starka vindar (+1 vindstyrka, +3 alstra pneumotropi)"
+  - name: "Starka vindar (+3 alstra pneumotropi)"
     occurs: 1
     days: 28
   - name: "Isande Kyla (-5C temperatur)"

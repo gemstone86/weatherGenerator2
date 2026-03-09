@@ -1,0 +1,82 @@
+events:
+  - name: "Magistorm"
+    occurs: 1
+    days: 365
+    bonus_wind: 0
+    bonus_temp: 0
+    bonus_rain: 0
+
+  - name: "Test"
+    occurs: 1
+    days: 2
+
+  - name: "Åska"
+    occurs: 1
+    days: 28
+    bonus_wind: 0
+    bonus_temp: 0
+    bonus_rain: 0
+
+  - name: "Lätt Dimma"
+    occurs: 1
+    days: 56
+    bonus_wind: -4
+    bonus_temp: -2
+    bonus_rain: 0
+    min_wind: 0
+    max_wind: 2
+
+  - name: "Tjock Dimma"
+    occurs: 1
+    days: 84
+    bonus_wind: -6
+    bonus_temp: -2
+    bonus_rain: 0
+    min_wind: 0
+    max_wind: 1
+
+  - name: "Köldknäpp"
+    occurs: 1
+    days: 200
+    start_month: 10
+    end_month: 2
+    bonus_wind: 0
+    bonus_temp: -5
+    bonus_rain: 0
+
+  - name: "Värmevåg"
+    occurs: 1
+    days: 200
+    start_month: 4
+    end_month: 8
+    bonus_wind: 0
+    bonus_temp: 5
+    bonus_rain: 0
+
+  - name: "Molnklart"
+    occurs: 1
+    days: 50
+    bonus_wind: 0
+    bonus_temp: 0
+    bonus_rain: -100
+
+  - name: "Stjärnfall"
+    occurs: 1
+    days: 300
+    bonus_wind: 0
+    bonus_temp: 0
+    bonus_rain: 0
+
+  - name: "Hagel"
+    occurs: 1
+    days: 150
+    bonus_wind: 0
+    bonus_temp: 0
+    bonus_rain: 0
+
+  - name: "Komet"
+    occurs: 1
+    days: 300
+    bonus_wind: 0
+    bonus_temp: 0
+    bonus_rain: 0
