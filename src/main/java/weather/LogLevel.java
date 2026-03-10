@@ -1,10 +1,11 @@
 package weather;
 
 public enum LogLevel {
-    DEBUG(0),
-    INFO(1),
-    WARNING(2),
-    ERROR(3);
+    ALL(0),
+	DEBUG(1),
+    INFO(2),
+    WARNING(3),
+    ERROR(4);
 
     private final int level;
 
