@@ -1,0 +1,32 @@
+# Compiled Java classes
+*.class
+
+# JAR files
+*.war
+*.ear
+
+# Maven build output
+target/
+dependency-reduced-pom.xml
+
+# Eclipse project files
+.classpath
+.project
+.settings/
+.metadata/
+*.launch
+
+# IntelliJ (in case you ever switch)
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+hs_err_pid*.log

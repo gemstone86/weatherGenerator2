@@ -17,6 +17,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import weather.CommentHandler;
+import weather.LogLevel;
+import weather.Logger;
 import weather.fileHandler;
 import weather.nationData;
 import weather.weather;
@@ -67,17 +69,14 @@ public class GuiApp {
 
         primaryStage.setTitle("Eon Weather Generator");
 
-        // Save comments on window close
-        primaryStage.setOnCloseRequest(e -> {
-            commentHandler.save(comments);
-            commentHandler.saveSession(year, month, day, nation);
-        });
 
         // ── Nation selector ──────────────────────────────────────────────
         listOfNations = fileHandler.getListOfNations();
         dropDownNations = new ComboBox<>();
         for (String n : listOfNations) dropDownNations.getItems().add(n);
-        dropDownNations.getSelectionModel().selectFirst();
+        dropDownNations.getSelectionModel().select(nation);
+        if (dropDownNations.getSelectionModel().getSelectedIndex() < 0)
+            dropDownNations.getSelectionModel().selectFirst();
 
         Label areaLabel = new Label("Område:");
         HBox areaBox = new HBox(8, areaLabel, dropDownNations);
@@ -169,6 +168,14 @@ public class GuiApp {
             updateWeather(listOfWeather, weatherData, otherEffects);
         });
 
+        // Save comments on window close
+        primaryStage.setOnCloseRequest(e -> {
+            commentHandler.save(comments);
+            Logger.log(LogLevel.DEBUG, 1, "saving area: " + dropDownNations.getValue());
+            Logger.log(LogLevel.DEBUG, 1, "saving year-month-day: " + year + "-" + month + "-" + day);
+            commentHandler.saveSession(year, month, day, dropDownNations.getValue());
+        });
+        
         // ── Show stage ────────────────────────────────────────────────────
         Scene scene = new Scene(root, 750, 450);
         primaryStage.setScene(scene);

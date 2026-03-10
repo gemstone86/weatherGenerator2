@@ -11,16 +11,19 @@ import java.util.Map;
 /**
  * Saves and loads day comments to/from comments.yaml
  * Also saves/loads last-used session state (date + nation) to/from session.yaml
+ * Creates a backup of the previous comments.yaml to comments-bak.yaml before each save.
  */
 public class CommentHandler {
 
     private final String commentsPath;
+    private final String commentsBackupPath;
     private final String sessionPath;
     private GuiApp guiApp;
 
     public CommentHandler(String basePath) {
-        this.commentsPath = basePath + "/src/comments/comments.yaml";
-        this.sessionPath  = basePath + "/src/comments/session.yaml";
+        this.commentsPath       = basePath + "/src/comments/comments.yaml";
+        this.commentsBackupPath = basePath + "/src/comments/comments-bak.yaml";
+        this.sessionPath        = basePath + "/src/comments/session.yaml";
     }
 
     // ── Comments ────────────────────────────────────────────────────────
@@ -66,6 +69,9 @@ public class CommentHandler {
 
         ensureDir(commentsPath);
 
+        // Back up the existing file on disk before overwriting it
+        backupComments();
+
         try {
             StringBuilder sb = new StringBuilder();
             toSave.entrySet().stream()
@@ -78,6 +84,23 @@ public class CommentHandler {
             Logger.log(LogLevel.INFO, 1, "Saved " + toSave.size() + " comments.");
         } catch (IOException e) {
             Logger.log(LogLevel.WARNING, 1, "Error saving comments: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Reads the current comments.yaml from disk and copies it to comments-bak.yaml.
+     * This means the backup always reflects the last saved state, not in-memory state.
+     */
+    private void backupComments() {
+        File source = new File(commentsPath);
+        if (!source.exists()) return;
+        try {
+            Files.copy(source.toPath(), Path.of(commentsBackupPath),
+                    StandardCopyOption.REPLACE_EXISTING);
+            Logger.log(LogLevel.INFO, 1, "Backup saved to comments-bak.yaml.");
+        } catch (IOException e) {
+            Logger.log(LogLevel.WARNING, 1, "Error creating backup: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -111,9 +134,9 @@ public class CommentHandler {
             Yaml yaml = new Yaml();
             Map<String, Object> data = yaml.load(fis);
             if (data != null) {
-                int year     = (int) data.getOrDefault("year",   defaultYear);
-                int month    = (int) data.getOrDefault("month",  defaultMonth);
-                int day      = (int) data.getOrDefault("day",    defaultDay);
+                int year      = (int) data.getOrDefault("year",   defaultYear);
+                int month     = (int) data.getOrDefault("month",  defaultMonth);
+                int day       = (int) data.getOrDefault("day",    defaultDay);
                 String nation = (String) data.getOrDefault("nation", defaultNation);
                 Logger.log(LogLevel.INFO, 1, "Loaded session: " + nation + " " + year + "-" + month + "-" + day);
                 return new SessionState(year, month, day, nation);
