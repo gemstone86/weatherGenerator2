@@ -1,8 +1,8 @@
 package gui;
 
 import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Random;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -10,11 +10,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import weather.CommentHandler;
+import weather.LogLevel;
+import weather.Logger;
 import weather.fileHandler;
 import weather.nationData;
 import weather.weather;
@@ -32,21 +36,32 @@ public class GuiApp {
 
     String nation;
 
+    TextArea commentBox;
+
     nationData nationData;
     fileHandler fileHandler;
     ComboBox<String> dropDownNations;
     String[] listOfNations;
 
-    weatherCalculator newCalc = new weatherCalculator(new Random());
+    HashMap<String, String> comments = new HashMap<>();
+    CommentHandler commentHandler;
+
+    weatherCalculator newCalc;
 
     public GuiApp(fileHandler fileHandler, final LinkedList<weather> listOfWeather,
-                  int start_year, int start_month, int start_day, String nation, Stage primaryStage) {
+                  int start_year, int start_month, int start_day, String nation, Stage primaryStage,
+                  weatherCalculator newCalc, CommentHandler commentHandler) {
 
         this.fileHandler = fileHandler;
         this.nation = nation;
         this.start_year = start_year;
         this.start_month = start_month;
         this.start_day = start_day;
+        this.newCalc = newCalc;
+        this.commentHandler = commentHandler;
+
+        // Load saved comments from file
+        comments = commentHandler.load(this);
 
         year = start_year;
         month = start_month;
@@ -54,11 +69,14 @@ public class GuiApp {
 
         primaryStage.setTitle("Eon Weather Generator");
 
+
         // ── Nation selector ──────────────────────────────────────────────
         listOfNations = fileHandler.getListOfNations();
         dropDownNations = new ComboBox<>();
         for (String n : listOfNations) dropDownNations.getItems().add(n);
-        dropDownNations.getSelectionModel().selectFirst();
+        dropDownNations.getSelectionModel().select(nation);
+        if (dropDownNations.getSelectionModel().getSelectedIndex() < 0)
+            dropDownNations.getSelectionModel().selectFirst();
 
         Label areaLabel = new Label("Område:");
         HBox areaBox = new HBox(8, areaLabel, dropDownNations);
@@ -110,11 +128,20 @@ public class GuiApp {
         weatherDisplay.setAlignment(Pos.CENTER_LEFT);
         weatherDisplay.setPadding(new Insets(8));
 
+        // ── Comment display ───────────────────────────────────────────────
+        Label commentLabel = new Label("Kommentar");
+        commentBox = new TextArea();
+        commentBox.setPromptText("Skriv en kommentar...");
+        commentBox.setPrefHeight(80);
+        commentBox.setWrapText(true);
+        VBox commentArea = new VBox(4, commentLabel, commentBox);
+        commentArea.setAlignment(Pos.BOTTOM_CENTER);
+
         // ── Print to file button ──────────────────────────────────────────
         Button printToFile = new Button("Print to file");
 
         // ── Root layout ───────────────────────────────────────────────────
-        VBox center = new VBox(12, areaBox, dateControls, weatherDisplay);
+        VBox center = new VBox(12, areaBox, dateControls, weatherDisplay, commentArea);
         center.setPadding(new Insets(12));
 
         BorderPane root = new BorderPane();
@@ -141,12 +168,21 @@ public class GuiApp {
             updateWeather(listOfWeather, weatherData, otherEffects);
         });
 
+        // Save comments on window close
+        primaryStage.setOnCloseRequest(e -> {
+            commentHandler.save(comments);
+            Logger.log(LogLevel.DEBUG, 1, "saving area: " + dropDownNations.getValue());
+            Logger.log(LogLevel.DEBUG, 1, "saving year-month-day: " + year + "-" + month + "-" + day);
+            commentHandler.saveSession(year, month, day, dropDownNations.getValue());
+        });
+        
         // ── Show stage ────────────────────────────────────────────────────
-        Scene scene = new Scene(root, 750, 300);
+        Scene scene = new Scene(root, 750, 450);
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        // Initial weather render
+        // Load comment for starting day and render weather
+        nextComment();
         updateWeather(listOfWeather, weatherData, otherEffects);
     }
 
@@ -166,20 +202,38 @@ public class GuiApp {
         other.setText(test.getOther());
     }
 
+    public String getDaySeed() {
+        return year + "-" + month + "-" + day;
+    }
+
+    public void oldComment() {
+        comments.put(getDaySeed(), commentBox.getText());
+    }
+
+    public void nextComment() {
+        commentBox.setText(comments.getOrDefault(getDaySeed(), ""));
+    }
+
     public void updateDay(int in) {
+        oldComment();
         day += in;
-        if (day > 28) { day = 1;  updateMonth(1);  }
+        if (day > 28) { day = 1;  updateMonth(1); }
         else if (day < 1) { day = 28; updateMonth(-1); }
+        nextComment();
     }
 
     public void updateMonth(int in) {
+        oldComment();
         month += in;
-        if (month > 12) { month -= 12; updateYear(1);  }
+        if (month > 12) { month -= 12; updateYear(1); }
         else if (month < 1) { month += 12; updateYear(-1); }
+        nextComment();
     }
 
     public void updateYear(int in) {
+        oldComment();
         year += in;
+        nextComment();
     }
 
     private void updateDisplays(TextField displayYear, TextField displayMonth, TextField displayDay) {

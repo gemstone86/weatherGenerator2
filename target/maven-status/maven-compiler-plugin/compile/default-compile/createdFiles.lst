@@ -8,3 +8,4 @@ weather\weather.class
 weather\weatherCalculator.class
 weather\direction.class
 weather\nationData.class
+weather\TxtToYamlConverter.class

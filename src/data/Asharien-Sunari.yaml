@@ -1,0 +1,56 @@
+name: "Asharien (Sunari)"
+
+temperature:
+  jan: 1
+  feb: 4
+  mar: 7
+  apr: 11
+  may: 16
+  jun: 21
+  jul: 22
+  aug: 23
+  sep: 20
+  oct: 14
+  nov: 9
+  dec: 4
+
+precipitation:
+  jan: 0
+  feb: 0
+  mar: 0
+  apr: 0
+  may: 0
+  jun: 0
+  jul: 0
+  aug: 0
+  sep: 0
+  oct: 1
+  nov: 1
+  dec: 1
+
+shift: 0
+
+wind:
+  jan: 0
+  feb: 0
+  mar: 0
+  apr: 0
+  may: 0
+  jun: 0
+  jul: 0
+  aug: 0
+  sep: 0
+  oct: 0
+  nov: 0
+  dec: 0
+
+events:
+  - name: "Dragon"
+    occurs: 1
+    days: 1000
+  - name: "Skugglandsräd"
+    occurs: 1
+    days: 250
+  - name: "Stor Skugglandsräd"
+    occurs: 1
+    days: 500

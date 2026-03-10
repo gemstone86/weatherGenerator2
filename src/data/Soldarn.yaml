@@ -1,0 +1,50 @@
+name: "Soldarn"
+
+temperature:
+  jan: 2
+  feb: 4
+  mar: 7
+  apr: 10
+  may: 13
+  jun: 16
+  jul: 18
+  aug: 20
+  sep: 16
+  oct: 10
+  nov: 7
+  dec: 5
+
+precipitation:
+  jan: 0
+  feb: 0
+  mar: 0
+  apr: 0
+  may: 0
+  jun: 0
+  jul: 0
+  aug: 0
+  sep: 0
+  oct: 1
+  nov: 1
+  dec: 1
+
+shift: 0
+
+wind:
+  jan: 0
+  feb: 0
+  mar: 0
+  apr: 0
+  may: 0
+  jun: 0
+  jul: 0
+  aug: 0
+  sep: 0
+  oct: 0
+  nov: 0
+  dec: 0
+
+events:
+  - name: "Dragon"
+    occurs: 1
+    days: 1000

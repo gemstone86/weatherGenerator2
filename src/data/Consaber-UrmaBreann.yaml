@@ -1,0 +1,50 @@
+name: "Consaber (Urma Breann)"
+
+temperature:
+  jan: -2
+  feb: -1
+  mar: 4
+  apr: 8
+  may: 12
+  jun: 18
+  jul: 22
+  aug: 23
+  sep: 19
+  oct: 13
+  nov: 7
+  dec: 0
+
+precipitation:
+  jan: 0
+  feb: 0
+  mar: 0
+  apr: 0
+  may: 0
+  jun: 0
+  jul: 0
+  aug: 0
+  sep: 0
+  oct: 1
+  nov: 1
+  dec: 1
+
+shift: 0
+
+wind:
+  jan: 0
+  feb: 0
+  mar: 0
+  apr: 0
+  may: 0
+  jun: 0
+  jul: 0
+  aug: 0
+  sep: 0
+  oct: 0
+  nov: 0
+  dec: 0
+
+events:
+  - name: "Dragon"
+    occurs: 1
+    days: 1000
