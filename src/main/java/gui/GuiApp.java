@@ -68,7 +68,10 @@ public class GuiApp {
         primaryStage.setTitle("Eon Weather Generator");
 
         // Save comments on window close
-        primaryStage.setOnCloseRequest(e -> commentHandler.save(comments));
+        primaryStage.setOnCloseRequest(e -> {
+            commentHandler.save(comments);
+            commentHandler.saveSession(year, month, day, nation);
+        });
 
         // ── Nation selector ──────────────────────────────────────────────
         listOfNations = fileHandler.getListOfNations();
@@ -193,7 +196,7 @@ public class GuiApp {
     }
 
     public String getDaySeed() {
-        return year+"-"+month+"-"+day;
+        return year + "-" + month + "-" + day;
     }
 
     public void oldComment() {

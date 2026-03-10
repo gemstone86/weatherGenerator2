@@ -29,7 +29,7 @@ public class Launcher extends Application {
         File dataFolder = new File(dataPath);
         File[] yamlFiles = dataFolder.listFiles((dir, name) -> name.endsWith(".yaml"));
         if (yamlFiles == null || yamlFiles.length == 0) {
-        	Logger.log(LogLevel.INFO, 1, "No YAML files found — converting .txt files...");
+            Logger.log(LogLevel.INFO, 1, "No YAML files found — converting .txt files...");
             TxtToYamlConverter.convertAll(path);
         }
 
@@ -49,13 +49,17 @@ public class Launcher extends Application {
         Logger.log(LogLevel.INFO, 0, "Step 5: Loading comments");
         CommentHandler commentHandler = new CommentHandler(path);
 
+        // Load session state — falls back to static defaults if no session file exists
+        SessionState session = commentHandler.loadSession(start_year, start_month, start_day, nation);
+
         Logger.log(LogLevel.INFO, 0, "Step 6: Setting up data");
         LinkedList<weather> list_of_weather = new LinkedList<weather>();
         filehandler.addToFile(filehandler.printHeader(), true);
         filehandler.closeWeatherFile();
 
         Logger.log(LogLevel.INFO, 0, "Step 7: Starting JavaFX GUI");
-        new GuiApp(filehandler, list_of_weather, start_year, start_month, start_day, nation, primaryStage, calculator, commentHandler);
+        new GuiApp(filehandler, list_of_weather, session.year, session.month, session.day,
+                   session.nation, primaryStage, calculator, commentHandler);
     }
 
     public static void main(String[] args) {
