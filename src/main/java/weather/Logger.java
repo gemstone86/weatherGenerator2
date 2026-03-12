@@ -2,7 +2,7 @@ package weather;
 
 public class Logger {
 
-    private static LogLevel setLevel = LogLevel.DEBUG;
+    private static LogLevel setLevel = LogLevel.INFO;
 
     public static void setLevel(LogLevel level) {
         setLevel = level;
