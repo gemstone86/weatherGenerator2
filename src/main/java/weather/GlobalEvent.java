@@ -20,6 +20,8 @@ public class GlobalEvent {
     private int endMonth;
     private int minWind;
     private int maxWind;
+    private double minTemperature;
+    private double maxTemperature;
 
     // Bonuses applied when event triggers
     private int bonusWind;
@@ -29,7 +31,7 @@ public class GlobalEvent {
     public GlobalEvent(String name, List<String> variants, int occurs, int days,
                        int startMonth, int endMonth,
                        int minWind, int maxWind,
-                       int bonusWind, int bonusTemp, int bonusRain) {
+                       int bonusWind, int bonusTemp, int bonusRain, double maxTemperature, double minTemperature) {
         this.name       = name;
         this.variants   = variants != null ? variants : new ArrayList<>();
         this.occurs     = occurs;
@@ -41,6 +43,8 @@ public class GlobalEvent {
         this.bonusWind  = bonusWind;
         this.bonusTemp  = bonusTemp;
         this.bonusRain  = bonusRain;
+        this.maxTemperature = maxTemperature;
+        this.minTemperature = minTemperature;
     }
 
     /**
@@ -61,9 +65,10 @@ public class GlobalEvent {
         return variants.size();
     }
 
-    public boolean conditionsMet(int month, int wind) {
+    public boolean conditionsMet(int month, int wind, double temperature) {
         if (wind < minWind || wind > maxWind) return false;
-
+        if (temperature < minTemperature || temperature > maxTemperature) return false;
+        
         if (startMonth != 0 && endMonth != 0) {
             if (startMonth <= endMonth) {
                 if (month < startMonth || month > endMonth) return false;

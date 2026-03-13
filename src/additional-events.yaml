@@ -76,8 +76,11 @@ events:
       - "Grundkrafter 5"
       - "Elementarkrafter 5"
       - "Himlakrafter 5"
+      - "Primalkrafter 5"
+      - "Livskrafter 5"
+      - "Symbolkrafter 5"
     occurs: 1
-    days: 336
+    days: 84
     bonus_wind: 0
     bonus_temp: 0
     bonus_rain: 0
@@ -87,8 +90,39 @@ events:
       - "Grundkrafter 10"
       - "Elementarkrafter 10"
       - "Himlakrafter 10"
+      - "Primalkrafter 10"
+      - "Livskrafter 10"
+      - "Symbolkrafter 10"
     occurs: 1
     days: 336
+    bonus_wind: 0
+    bonus_temp: 0
+    bonus_rain: 0
+
+  - name: "Kraftig Magistorm"
+    list:
+      - "Grundkrafter 15"
+      - "Elementarkrafter 15"
+      - "Himlakrafter 15"
+      - "Primalkrafter 15"
+      - "Livskrafter 15"
+      - "Symbolkrafter 15"
+    occurs: 1
+    days: 672
+    bonus_wind: 0
+    bonus_temp: 0
+    bonus_rain: 0
+
+  - name: "Svår Magistorm"
+    list:
+      - "Grundkrafter 15"
+      - "Elementarkrafter 15"
+      - "Himlakrafter 15"
+      - "Primalkrafter 15"
+      - "Livskrafter 15"
+      - "Symbolkrafter 15"
+    occurs: 1
+    days: 1344
     bonus_wind: 0
     bonus_temp: 0
     bonus_rain: 0

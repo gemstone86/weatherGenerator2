@@ -112,13 +112,13 @@ public class weatherCalculator {
         }
     }
 
-    public String generateEvents(LinkedList<event> regionEvents, List<GlobalEvent> globalEvents, int month, int wind) {
+    public String generateEvents(LinkedList<event> regionEvents, List<GlobalEvent> globalEvents, int month, int wind, double temperature) {
         StringBuilder result = new StringBuilder();
         Logger.log(LogLevel.DEBUG, 2, "Num of Global events " + globalEvents.size());
 
         for (GlobalEvent e : globalEvents) {
             Logger.log(LogLevel.DEBUG, 2, "Checking event: " + e.getName());
-            if (e.conditionsMet(month, wind) && chance(e.getOccurs(), e.getDays())) {
+            if (e.conditionsMet(month, wind, temperature) && chance(e.getOccurs(), e.getDays())) {
                 int variantIdx = e.hasVariants() ? rng.nextInt(e.getVariantCount()) : 0;
                 String displayName = e.getDisplayName(variantIdx);
                 if (result.isEmpty()) result.append(displayName);
@@ -156,8 +156,8 @@ public class weatherCalculator {
         int rain        = nation.getRain(month);
         rng.setSeed(daySeed(year, month, day));
         int wind = windStrengthFractal(year, month, averageWind);
-        String events = generateEvents(nation.getEvents(), globalEvents, month, wind);
         double temperature = getProceduralTemperature(previous, average, next, day) + bonusTemp;
+        String events = generateEvents(nation.getEvents(), globalEvents, month, wind, temperature);
         bonusTemp = 0;
         return new weather(year, month, day, temperature, wind,
                 rainfall(temperature, average, wind, rain), events,

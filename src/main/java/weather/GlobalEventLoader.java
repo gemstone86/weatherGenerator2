@@ -38,6 +38,8 @@ public class GlobalEventLoader {
                 int bonusWind  = getInt(e, "bonus_wind", 0);
                 int bonusTemp  = getInt(e, "bonus_temp", 0);
                 int bonusRain  = getInt(e, "bonus_rain", 0);
+                double minTemperature = getInt(e, "min_temp", -999);
+                double maxTemperature = getInt(e, "max_temp", 999);
 
                 // Load optional variant list
                 List<String> variants = new ArrayList<>();
@@ -50,7 +52,7 @@ public class GlobalEventLoader {
 
                 result.add(new GlobalEvent(name, variants, occurs, days,
                         startMonth, endMonth, minWind, maxWind,
-                        bonusWind, bonusTemp, bonusRain));
+                        bonusWind, bonusTemp, bonusRain, minTemperature, maxTemperature));
 
                 if (variants.isEmpty()) {
                     Logger.log(LogLevel.INFO, 1, "\t" + name + ": " + occurs + " of " + days);
