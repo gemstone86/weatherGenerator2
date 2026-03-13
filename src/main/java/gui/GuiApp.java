@@ -17,6 +17,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import weather.CommentHandler;
+import weather.Lang;
+import weather.Localization;
 import weather.LogLevel;
 import weather.Logger;
 import weather.fileHandler;
@@ -48,6 +50,12 @@ public class GuiApp {
 
     weatherCalculator newCalc;
 
+    // Labels and controls that need updating on language switch
+    Label areaLabel, weatherLabel, miscLabel, commentLabel, dayLabel, monthLabel, yearLabel;
+    Button printToFile, langToggle;
+    Stage primaryStage;
+    TextField weatherData, otherEffects;
+
     public GuiApp(fileHandler fileHandler, final LinkedList<weather> listOfWeather,
                   int start_year, int start_month, int start_day, String nation, Stage primaryStage,
                   weatherCalculator newCalc, CommentHandler commentHandler) {
@@ -59,6 +67,7 @@ public class GuiApp {
         this.start_day = start_day;
         this.newCalc = newCalc;
         this.commentHandler = commentHandler;
+        this.primaryStage = primaryStage;
 
         // Load saved comments from file
         comments = commentHandler.load(this);
@@ -67,8 +76,7 @@ public class GuiApp {
         month = start_month;
         day = start_day;
 
-        primaryStage.setTitle("Eon Weather Generator");
-
+        primaryStage.setTitle(Localization.get("title"));
 
         // ── Nation selector ──────────────────────────────────────────────
         listOfNations = fileHandler.getListOfNations();
@@ -78,7 +86,7 @@ public class GuiApp {
         if (dropDownNations.getSelectionModel().getSelectedIndex() < 0)
             dropDownNations.getSelectionModel().selectFirst();
 
-        Label areaLabel = new Label("Område:");
+        areaLabel = new Label(Localization.get("label.area"));
         HBox areaBox = new HBox(8, areaLabel, dropDownNations);
         areaBox.setAlignment(Pos.CENTER);
 
@@ -91,30 +99,33 @@ public class GuiApp {
             tf.setEditable(false);
         }
 
-        TextField weatherData  = new TextField();
+        weatherData = new TextField();
         weatherData.setPrefWidth(320);
         weatherData.setEditable(false);
 
-        TextField otherEffects = new TextField();
+        otherEffects = new TextField();
         otherEffects.setPrefWidth(420);
         otherEffects.setEditable(false);
 
         // ── Day controls ──────────────────────────────────────────────────
         Button dayUp   = new Button("+");
         Button dayDown = new Button("-");
-        HBox dayBox = new HBox(4, new Label("Dag"), dayDown, displayDay, dayUp);
+        dayLabel = new Label(Localization.get("label.day"));
+        HBox dayBox = new HBox(4, dayLabel, dayDown, displayDay, dayUp);
         dayBox.setAlignment(Pos.CENTER);
 
         // ── Month controls ────────────────────────────────────────────────
         Button monthUp   = new Button("+");
         Button monthDown = new Button("-");
-        HBox monthBox = new HBox(4, new Label("Månad"), monthDown, displayMonth, monthUp);
+        monthLabel = new Label(Localization.get("label.month"));
+        HBox monthBox = new HBox(4, monthLabel, monthDown, displayMonth, monthUp);
         monthBox.setAlignment(Pos.CENTER);
 
         // ── Year controls ─────────────────────────────────────────────────
         Button yearUp   = new Button("+");
         Button yearDown = new Button("-");
-        HBox yearBox = new HBox(4, new Label("År"), yearDown, displayYear, yearUp);
+        yearLabel = new Label(Localization.get("label.year"));
+        HBox yearBox = new HBox(4, yearLabel, yearDown, displayYear, yearUp);
         yearBox.setAlignment(Pos.CENTER);
 
         HBox dateControls = new HBox(16, dayBox, monthBox, yearBox);
@@ -122,84 +133,106 @@ public class GuiApp {
         dateControls.setPadding(new Insets(8));
 
         // ── Weather display ───────────────────────────────────────────────
-        Label weatherLabel = new Label("Väder");
-        Label miscLabel = new Label("Övrigt");
+        weatherLabel = new Label(Localization.get("label.weather"));
+        miscLabel    = new Label(Localization.get("label.misc"));
         VBox weatherDisplay = new VBox(4, weatherLabel, weatherData, miscLabel, otherEffects);
         weatherDisplay.setAlignment(Pos.CENTER_LEFT);
         weatherDisplay.setPadding(new Insets(8));
 
         // ── Comment display ───────────────────────────────────────────────
-        Label commentLabel = new Label("Kommentar");
+        commentLabel = new Label(Localization.get("label.comment"));
         commentBox = new TextArea();
-        commentBox.setPromptText("Skriv en kommentar...");
+        commentBox.setPromptText(Localization.get("prompt.comment"));
         commentBox.setPrefHeight(80);
         commentBox.setWrapText(true);
         VBox commentArea = new VBox(4, commentLabel, commentBox);
         commentArea.setAlignment(Pos.BOTTOM_CENTER);
 
-        // ── Print to file button ──────────────────────────────────────────
-        Button printToFile = new Button("Print to file");
+        // ── Buttons ───────────────────────────────────────────────────────
+        printToFile = new Button(Localization.get("button.printfile"));
+        langToggle  = new Button(Localization.get("button.lang"));
 
         // ── Root layout ───────────────────────────────────────────────────
         VBox center = new VBox(12, areaBox, dateControls, weatherDisplay, commentArea);
         center.setPadding(new Insets(12));
 
+        HBox bottomBar = new HBox(8, langToggle, printToFile);
+        bottomBar.setAlignment(Pos.CENTER_RIGHT);
+        bottomBar.setPadding(new Insets(8));
+
         BorderPane root = new BorderPane();
         root.setCenter(center);
-//      root.setBottom(printToFile);
-        BorderPane.setAlignment(printToFile, Pos.CENTER_RIGHT);
-        BorderPane.setMargin(printToFile, new Insets(8));
+        root.setBottom(bottomBar);
 
         // ── Event handlers ────────────────────────────────────────────────
-        dropDownNations.setOnAction(e -> updateWeather(listOfWeather, weatherData, otherEffects));
+        dropDownNations.setOnAction(e -> updateWeather(listOfWeather));
 
-        yearUp.setOnAction(e -> { updateYear(1);   updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather, weatherData, otherEffects); });
-        yearDown.setOnAction(e -> { updateYear(-1); updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather, weatherData, otherEffects); });
-
-        monthUp.setOnAction(e -> { updateMonth(1);   updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather, weatherData, otherEffects); });
-        monthDown.setOnAction(e -> { updateMonth(-1); updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather, weatherData, otherEffects); });
-
-        dayUp.setOnAction(e -> { updateDay(1);   updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather, weatherData, otherEffects); });
-        dayDown.setOnAction(e -> { updateDay(-1); updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather, weatherData, otherEffects); });
+        yearUp.setOnAction(e ->    { updateYear(1);    updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather); });
+        yearDown.setOnAction(e ->  { updateYear(-1);   updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather); });
+        monthUp.setOnAction(e ->   { updateMonth(1);   updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather); });
+        monthDown.setOnAction(e -> { updateMonth(-1);  updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather); });
+        dayUp.setOnAction(e ->     { updateDay(1);     updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather); });
+        dayDown.setOnAction(e ->   { updateDay(-1);    updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather); });
 
         printToFile.setOnAction(e -> {
             updateMonth(-1);
             updateDisplays(displayYear, displayMonth, displayDay);
-            updateWeather(listOfWeather, weatherData, otherEffects);
+            updateWeather(listOfWeather);
         });
 
-        // Save comments on window close
+        langToggle.setOnAction(e -> {
+            Localization.setLangFromString(Localization.getLang() == Lang.SV ? "EN" : "SV");
+            refreshLabels();
+            updateWeather(listOfWeather); // re-render weather text in new language
+        });
+
+        // Save comments and session on window close
         primaryStage.setOnCloseRequest(e -> {
             commentHandler.save(comments);
             Logger.log(LogLevel.DEBUG, 1, "saving area: " + dropDownNations.getValue());
             Logger.log(LogLevel.DEBUG, 1, "saving year-month-day: " + year + "-" + month + "-" + day);
             commentHandler.saveSession(year, month, day, dropDownNations.getValue());
         });
-        
+
         // ── Show stage ────────────────────────────────────────────────────
-        Scene scene = new Scene(root, 750, 450);
+        Scene scene = new Scene(root, 750, 470);
         primaryStage.setScene(scene);
         primaryStage.show();
 
         // Load comment for starting day and render weather
         nextComment();
-        updateWeather(listOfWeather, weatherData, otherEffects);
+        updateWeather(listOfWeather);
     }
 
-    public void updateWeather(LinkedList<weather> weatherList, TextField data, TextField other) {
+    /** Re-apply all localized strings after a language switch. */
+    private void refreshLabels() {
+        primaryStage.setTitle(Localization.get("title"));
+        areaLabel.setText(Localization.get("label.area"));
+        dayLabel.setText(Localization.get("label.day"));
+        monthLabel.setText(Localization.get("label.month"));
+        yearLabel.setText(Localization.get("label.year"));
+        weatherLabel.setText(Localization.get("label.weather"));
+        miscLabel.setText(Localization.get("label.misc"));
+        commentLabel.setText(Localization.get("label.comment"));
+        commentBox.setPromptText(Localization.get("prompt.comment"));
+        printToFile.setText(Localization.get("button.printfile"));
+        langToggle.setText(Localization.get("button.lang"));
+    }
+
+    public void updateWeather(LinkedList<weather> weatherList) {
         nation = listOfNations[dropDownNations.getSelectionModel().getSelectedIndex()];
         nationData = fileHandler.getNation(nation);
 
         weather test = newCalc.getWeather(year, month, day, nationData);
         DecimalFormat df = new DecimalFormat("##");
 
-        String text = "Temperatur: " + df.format(test.getTemperature()) + "C"
-                + "   Vindstyrka: " + test.getWindStrength()
+        String text = Localization.get("weather.temp") + ": " + df.format(test.getTemperature()) + "C"
+                + "   " + Localization.get("weather.wind") + ": " + test.getWindStrength()
                 + " (" + test.getDirection() + ")"
-                + "   Regnmängd: " + test.getRain();
+                + "   " + Localization.get("weather.rain") + ": " + test.getRain();
 
-        data.setText(text);
-        other.setText(test.getOther());
+        weatherData.setText(text);
+        otherEffects.setText(test.getOther());
     }
 
     public String getDaySeed() {

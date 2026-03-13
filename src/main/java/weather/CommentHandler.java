@@ -8,11 +8,6 @@ import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Saves and loads day comments to/from comments.yaml
- * Also saves/loads last-used session state (date + nation) to/from session.yaml
- * Creates a backup of the previous comments.yaml to comments-bak.yaml before each save.
- */
 public class CommentHandler {
 
     private final String commentsPath;
@@ -28,7 +23,6 @@ public class CommentHandler {
 
     // ── Comments ────────────────────────────────────────────────────────
 
-    @SuppressWarnings("unchecked")
     public HashMap<String, String> load(GuiApp guiApp) {
         HashMap<String, String> comments = new HashMap<>();
         File file = new File(commentsPath);
@@ -41,10 +35,11 @@ public class CommentHandler {
 
         try (FileInputStream fis = new FileInputStream(file)) {
             Yaml yaml = new Yaml();
-            Map<Object, Object> data = yaml.load(fis);
-            if (data != null) {
-                for (Map.Entry<Object, Object> entry : data.entrySet()) {
-                    String key   = (String) entry.getKey();
+            Object raw = yaml.load(fis);
+            if (raw instanceof Map) {
+                Map<?, ?> data = (Map<?, ?>) raw;
+                for (Map.Entry<?, ?> entry : data.entrySet()) {
+                    String key   = String.valueOf(entry.getKey());
                     String value = entry.getValue() != null ? entry.getValue().toString() : "";
                     if (!value.isEmpty()) comments.put(key, value);
                 }
@@ -68,8 +63,6 @@ public class CommentHandler {
         }
 
         ensureDir(commentsPath);
-
-        // Back up the existing file on disk before overwriting it
         backupComments();
 
         try {
@@ -88,10 +81,6 @@ public class CommentHandler {
         }
     }
 
-    /**
-     * Reads the current comments.yaml from disk and copies it to comments-bak.yaml.
-     * This means the backup always reflects the last saved state, not in-memory state.
-     */
     private void backupComments() {
         File source = new File(commentsPath);
         if (!source.exists()) return;
@@ -113,7 +102,8 @@ public class CommentHandler {
             String content = "year: " + year + "\n"
                            + "month: " + month + "\n"
                            + "day: " + day + "\n"
-                           + "nation: \"" + nation + "\"\n";
+                           + "nation: \"" + nation + "\"\n"
+                           + "lang: " + Localization.getLang().name() + "\n";
             Files.writeString(Path.of(sessionPath), content);
             Logger.log(LogLevel.INFO, 1, "Saved session state.");
         } catch (IOException e) {
@@ -122,34 +112,47 @@ public class CommentHandler {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public SessionState loadSession(int defaultYear, int defaultMonth, int defaultDay, String defaultNation) {
         File file = new File(sessionPath);
         if (!file.exists()) {
             Logger.log(LogLevel.INFO, 1, "No session file found, using defaults.");
-            return new SessionState(defaultYear, defaultMonth, defaultDay, defaultNation);
+            return new SessionState(defaultYear, defaultMonth, defaultDay, defaultNation, "SV");
         }
 
         try (FileInputStream fis = new FileInputStream(file)) {
             Yaml yaml = new Yaml();
-            Map<String, Object> data = yaml.load(fis);
-            if (data != null) {
-                int year      = (int) data.getOrDefault("year",   defaultYear);
-                int month     = (int) data.getOrDefault("month",  defaultMonth);
-                int day       = (int) data.getOrDefault("day",    defaultDay);
-                String nation = (String) data.getOrDefault("nation", defaultNation);
-                Logger.log(LogLevel.INFO, 1, "Loaded session: " + nation + " " + year + "-" + month + "-" + day);
-                return new SessionState(year, month, day, nation);
+            Object raw = yaml.load(fis);
+            if (raw instanceof Map) {
+                Map<?, ?> data = (Map<?, ?>) raw;
+                int year      = parseIntOrDefault(data.get("year"),   defaultYear);
+                int month     = parseIntOrDefault(data.get("month"),  defaultMonth);
+                int day       = parseIntOrDefault(data.get("day"),    defaultDay);
+                String nation = parseStrOrDefault(data.get("nation"), defaultNation);
+                String lang   = parseStrOrDefault(data.get("lang"),   "SV");
+                Logger.log(LogLevel.INFO, 1, "Loaded session: " + nation + " " + year + "-" + month + "-" + day + " [" + lang + "]");
+                return new SessionState(year, month, day, nation, lang);
             }
         } catch (IOException e) {
             Logger.log(LogLevel.WARNING, 1, "Error loading session: " + e.getMessage());
             e.printStackTrace();
         }
 
-        return new SessionState(defaultYear, defaultMonth, defaultDay, defaultNation);
+        return new SessionState(defaultYear, defaultMonth, defaultDay, defaultNation, "SV");
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────
+
+    private int parseIntOrDefault(Object val, int def) {
+        if (val == null) return def;
+        try { return Integer.parseInt(val.toString()); }
+        catch (NumberFormatException e) { return def; }
+    }
+
+    private String parseStrOrDefault(Object val, String def) {
+        if (val == null) return def;
+        String s = val.toString().trim();
+        return s.isEmpty() ? def : s;
+    }
 
     private void ensureDir(String path) {
         File dir = new File(path).getParentFile();

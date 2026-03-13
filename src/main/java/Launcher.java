@@ -24,7 +24,6 @@ public class Launcher extends Application {
     public void start(Stage primaryStage) {
         Logger.log(LogLevel.INFO, 0, "Step 0: Path is \"" + path + "\"");
 
-        // Convert .txt files to .yaml if no .yaml files exist yet
         String dataPath = path + "/src/data";
         File dataFolder = new File(dataPath);
         File[] yamlFiles = dataFolder.listFiles((dir, name) -> name.endsWith(".yaml"));
@@ -48,9 +47,10 @@ public class Launcher extends Application {
 
         Logger.log(LogLevel.INFO, 0, "Step 5: Loading comments");
         CommentHandler commentHandler = new CommentHandler(path);
-
-        // Load session state — falls back to static defaults if no session file exists
         SessionState session = commentHandler.loadSession(start_year, start_month, start_day, nation);
+
+        // Apply saved language using string — avoids any enum casting issues in bytecode
+        Localization.setLangFromString(session.lang);
 
         Logger.log(LogLevel.INFO, 0, "Step 6: Setting up data");
         LinkedList<weather> list_of_weather = new LinkedList<weather>();
