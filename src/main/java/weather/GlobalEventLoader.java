@@ -12,21 +12,19 @@ public class GlobalEventLoader {
 
     @SuppressWarnings("unchecked")
     public static List<GlobalEvent> load(String basePath) {
-        
-    	String path = basePath + "\\src\\additional-events.yaml";
-    	Logger.log(LogLevel.INFO, 2, "Additional-events path is: " + path);
-    	File file = new File(path);
+        String path = basePath + "/src/additional-events.yaml";
+        File file = new File(path);
         List<GlobalEvent> result = new ArrayList<>();
 
-        
         if (!file.exists()) {
-        	Logger.log(LogLevel.WARNING, 0, "No additional-events.yaml found at " + path);
+            Logger.log(LogLevel.WARNING, 1, "No additional-events.yaml found at " + path);
             return result;
         }
 
         try (FileInputStream fis = new FileInputStream(file)) {
             Yaml yaml = new Yaml();
             Map<String, Object> data = yaml.load(fis);
+            Logger.log(LogLevel.INFO, 1, "Additional-events path is: " + path);
             List<Map<String, Object>> events = (List<Map<String, Object>>) data.get("events");
 
             for (Map<String, Object> e : events) {
@@ -41,19 +39,32 @@ public class GlobalEventLoader {
                 int bonusTemp  = getInt(e, "bonus_temp", 0);
                 int bonusRain  = getInt(e, "bonus_rain", 0);
 
-                result.add(new GlobalEvent(name, occurs, days,
+                // Load optional variant list
+                List<String> variants = new ArrayList<>();
+                Object listField = e.get("list");
+                if (listField instanceof List) {
+                    for (Object item : (List<?>) listField) {
+                        if (item != null) variants.add(item.toString().trim());
+                    }
+                }
+
+                result.add(new GlobalEvent(name, variants, occurs, days,
                         startMonth, endMonth, minWind, maxWind,
                         bonusWind, bonusTemp, bonusRain));
-                
-                Logger.log(LogLevel.INFO, 2, result.getLast().toString());
+
+                if (variants.isEmpty()) {
+                    Logger.log(LogLevel.INFO, 1, "\t" + name + ": " + occurs + " of " + days);
+                } else {
+                    Logger.log(LogLevel.INFO, 1, "\t" + name + " (" + variants.size() + " variants): " + occurs + " of " + days);
+                }
             }
 
         } catch (IOException e) {
-        	Logger.log(LogLevel.WARNING, 2, "Error loading additional-events.yaml: " + e.getMessage());
+            Logger.log(LogLevel.WARNING, 1, "Error loading additional-events.yaml: " + e.getMessage());
             e.printStackTrace();
         }
 
-        Logger.log(LogLevel.INFO, 2, "Loaded " + result.size() + " global events.");
+        Logger.log(LogLevel.INFO, 1, "Loaded " + result.size() + " global events.");
         return result;
     }
 

@@ -71,23 +71,24 @@ events:
     bonus_temp: 0
     bonus_rain: 0
 
-  - name: "Magistorm (Elementarkrafter 5)"
+  - name: "Liten Magistorm"
+    list:
+      - "Grundkrafter 5"
+      - "Elementarkrafter 5"
+      - "Himlakrafter 5"
     occurs: 1
-    days: 672
-    bonus_wind: 0
-    bonus_temp: 0
-    bonus_rain: 0
-	
-  - name: "Magistorm (Grundkrafter 5)"
-    occurs: 1
-    days: 672
+    days: 336
     bonus_wind: 0
     bonus_temp: 0
     bonus_rain: 0
 
-  - name: "Magistorm (Himlakrafter 5)"
+  - name: "Magistorm"
+    list:
+      - "Grundkrafter 10"
+      - "Elementarkrafter 10"
+      - "Himlakrafter 10"
     occurs: 1
-    days: 672
+    days: 336
     bonus_wind: 0
     bonus_temp: 0
     bonus_rain: 0

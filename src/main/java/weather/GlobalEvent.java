@@ -1,31 +1,37 @@
 package weather;
 
+import java.util.List;
+import java.util.ArrayList;
+
 /**
  * Represents a global event that can happen in any region.
  * Conditions (start_month, end_month, min_wind, max_wind) are optional.
  * Bonus fields affect weather calculation for that day.
+ * Optional 'list' field provides named variants — one is picked randomly when the event triggers.
  */
 public class GlobalEvent {
     private String name;
+    private List<String> variants; // optional — if set, result is "Name (Variant)"
     private int occurs;
     private int days;
 
     // Conditions (defaults = no restriction)
-    private int startMonth; // 0 = no restriction
-    private int endMonth;   // 0 = no restriction
-    private int minWind;    // 0 = no restriction
-    private int maxWind;    // 999 = no restriction
+    private int startMonth;
+    private int endMonth;
+    private int minWind;
+    private int maxWind;
 
     // Bonuses applied when event triggers
     private int bonusWind;
     private int bonusTemp;
     private int bonusRain;
 
-    public GlobalEvent(String name, int occurs, int days,
+    public GlobalEvent(String name, List<String> variants, int occurs, int days,
                        int startMonth, int endMonth,
                        int minWind, int maxWind,
                        int bonusWind, int bonusTemp, int bonusRain) {
         this.name       = name;
+        this.variants   = variants != null ? variants : new ArrayList<>();
         this.occurs     = occurs;
         this.days       = days;
         this.startMonth = startMonth;
@@ -38,18 +44,30 @@ public class GlobalEvent {
     }
 
     /**
-     * Check if this event's conditions are met for the given month and wind.
+     * Returns the display name, picking a random variant if any are defined.
+     * Needs an index to pick deterministically from the list.
      */
+    public String getDisplayName(int randomIndex) {
+        if (variants.isEmpty()) return name;
+        String variant = variants.get(randomIndex % variants.size());
+        return name + " (" + variant + ")";
+    }
+
+    public boolean hasVariants() {
+        return !variants.isEmpty();
+    }
+
+    public int getVariantCount() {
+        return variants.size();
+    }
+
     public boolean conditionsMet(int month, int wind) {
-        // Check wind range
         if (wind < minWind || wind > maxWind) return false;
 
-        // Check month range (handles wrap-around e.g. Oct-Feb)
         if (startMonth != 0 && endMonth != 0) {
             if (startMonth <= endMonth) {
                 if (month < startMonth || month > endMonth) return false;
             } else {
-                // Wraps around year end e.g. Oct(10) to Feb(2)
                 if (month < startMonth && month > endMonth) return false;
             }
         }
@@ -63,8 +81,4 @@ public class GlobalEvent {
     public int getBonusWind()   { return bonusWind; }
     public int getBonusTemp()   { return bonusTemp; }
     public int getBonusRain()   { return bonusRain; }
-    
-    public String toString() {
-    	return("\t"+name + ": " + occurs + " of " + days);
-    }
 }
