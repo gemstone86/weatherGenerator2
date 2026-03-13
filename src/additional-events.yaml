@@ -1,11 +1,4 @@
 events:
-  - name: "Magistorm (Grundkrafter 5)"
-    occurs: 1
-    days: 336
-    bonus_wind: 0
-    bonus_temp: 0
-    bonus_rain: 0
-
   - name: "Åska"
     occurs: 1
     days: 28
@@ -80,7 +73,21 @@ events:
 
   - name: "Magistorm (Elementarkrafter 5)"
     occurs: 1
-    days: 336
+    days: 672
+    bonus_wind: 0
+    bonus_temp: 0
+    bonus_rain: 0
+	
+  - name: "Magistorm (Grundkrafter 5)"
+    occurs: 1
+    days: 672
+    bonus_wind: 0
+    bonus_temp: 0
+    bonus_rain: 0
+
+  - name: "Magistorm (Himlakrafter 5)"
+    occurs: 1
+    days: 672
     bonus_wind: 0
     bonus_temp: 0
     bonus_rain: 0
