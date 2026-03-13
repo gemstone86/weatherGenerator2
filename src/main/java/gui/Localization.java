@@ -1,7 +1,5 @@
 package gui;
 
-import weather.Lang;
-
 public class Localization {
 
     private static Lang currentLang = Lang.SV;

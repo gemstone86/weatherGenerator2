@@ -1,11 +1,11 @@
 package weather;
 
+import context.Logger;
+import context.LogLevel;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-
-import context.LogLevel;
-import context.Logger;
 
 public class weatherCalculator {
     Random rng;
@@ -159,11 +159,63 @@ public class weatherCalculator {
         int rain        = nation.getRain(month);
         rng.setSeed(daySeed(year, month, day));
         int wind = windStrengthFractal(year, month, averageWind);
-        double temperature = getProceduralTemperature(previous, average, next, day) + bonusTemp;
+        double temperature = getProceduralTemperature(previous, average, next, day);
         String events = generateEvents(nation.getEvents(), globalEvents, month, wind, temperature);
+        temperature += bonusTemp;
         bonusTemp = 0;
         return new weather(year, month, day, temperature, wind,
                 rainfall(temperature, average, wind, rain), events,
                 getNonRandomDirection());
     }
+
+    /**
+     * Generates 24 hourly values for temperature, wind, and rain for a given day.
+     * Uses a seeded RNG so the same day always produces the same hourly pattern.
+     * Returns a double[3][24] where [0]=temperature, [1]=wind, [2]=rain.
+     */
+    public double[][] getHourlyWeather(int year, int month, int day, nationData nation) {
+        weather daily = getWeather(year, month, day, nation);
+        double dailyTemp = daily.getTemperature();
+        int dailyWind    = daily.getWindStrength();
+        int dailyRain    = daily.getRain();
+
+        // Seed per day so results are deterministic
+        Random hourRng = new Random(daySeed(year, month, day) * 31L + 7);
+
+        double[] temps = new double[24];
+        double[] winds = new double[24];
+        double[] rains = new double[24];
+
+        // Temperature: smooth sine-like curve peaking at hour 14, lowest at hour 4
+        // plus small seeded noise
+        for (int h = 0; h < 24; h++) {
+            double angle = Math.PI * 2 * (h - 4) / 24.0;
+            double curve = Math.sin(angle) * 3.0; // ±3 degree swing
+            double noise = (hourRng.nextDouble() - 0.5) * 2.0; // ±1 noise
+            temps[h] = dailyTemp + curve + noise;
+        }
+
+        // Wind: random walk clamped around daily value
+        double wind = dailyWind;
+        for (int h = 0; h < 24; h++) {
+            wind += (hourRng.nextDouble() - 0.5) * 2.0;
+            wind = Math.max(0, Math.min(wind, dailyWind * 2.0 + 4));
+            // Drift back toward daily value
+            wind += (dailyWind - wind) * 0.15;
+            winds[h] = wind;
+        }
+
+        // Rain: 0 if daily rain is 0, otherwise random variation around daily
+        if (dailyRain == 0) {
+            // All zeros
+        } else {
+            for (int h = 0; h < 24; h++) {
+                double r = dailyRain + (hourRng.nextDouble() - 0.5) * dailyRain * 0.8;
+                rains[h] = Math.max(0, r);
+            }
+        }
+
+        return new double[][]{ temps, winds, rains };
+    }
+
 }
