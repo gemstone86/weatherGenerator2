@@ -1,4 +1,6 @@
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,7 +24,14 @@ public class Launcher extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        Logger.log(LogLevel.INFO, 0, "Step 0: Path is \"" + path + "\"");
+    	// Redirect stderr to a file so errors are never lost
+    	try {
+    	    PrintStream errLog = new PrintStream(new FileOutputStream(path + "/error.log", true));
+    	    System.setErr(errLog);
+    	} catch (Exception e) { /* ignore */ }
+    	Logger.setLevel(LogLevel.INFO);
+    	
+    	Logger.log(LogLevel.INFO, 0, "Step 0: Path is \"" + path + "\"");
 
         String dataPath = path + "/src/data";
         File dataFolder = new File(dataPath);

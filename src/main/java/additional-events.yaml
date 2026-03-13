@@ -6,10 +6,6 @@ events:
     bonus_temp: 0
     bonus_rain: 0
 
-  - name: "Test"
-    occurs: 1
-    days: 1
-
   - name: "Åska"
     occurs: 1
     days: 28

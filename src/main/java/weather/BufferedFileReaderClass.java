@@ -3,8 +3,6 @@ package weather;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import gui.*;
-
 
 public class BufferedFileReaderClass extends BufferedReader {
 
