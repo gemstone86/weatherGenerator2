@@ -1,4 +1,4 @@
-package weather;
+package context;
 
 public enum LogLevel {
     ALL(0),

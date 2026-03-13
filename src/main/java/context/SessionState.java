@@ -1,4 +1,4 @@
-package weather;
+package context;
 
 public class SessionState {
     public int year;

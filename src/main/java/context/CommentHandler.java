@@ -1,7 +1,8 @@
-package weather;
+package context;
 
 import org.yaml.snakeyaml.Yaml;
 import gui.GuiApp;
+import gui.Localization;
 
 import java.io.*;
 import java.nio.file.*;

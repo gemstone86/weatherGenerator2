@@ -6,10 +6,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import context.CommentHandler;
+import context.LogLevel;
+import context.Logger;
+import context.SessionState;
+import context.TxtToYamlConverter;
+import context.fileHandler;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
 import gui.GuiApp;
+import gui.Localization;
 import weather.*;
 
 public class Launcher extends Application {

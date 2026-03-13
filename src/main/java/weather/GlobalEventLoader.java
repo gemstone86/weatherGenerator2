@@ -2,6 +2,9 @@ package weather;
 
 import org.yaml.snakeyaml.Yaml;
 
+import context.LogLevel;
+import context.Logger;
+
 import java.io.*;
 import java.util.*;
 

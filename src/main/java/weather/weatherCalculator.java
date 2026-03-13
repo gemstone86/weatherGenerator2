@@ -4,6 +4,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import context.LogLevel;
+import context.Logger;
+
 public class weatherCalculator {
     Random rng;
     Random yearRng = new Random();

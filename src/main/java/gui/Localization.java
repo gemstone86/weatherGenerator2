@@ -1,4 +1,6 @@
-package weather;
+package gui;
+
+import weather.Lang;
 
 public class Localization {
 
