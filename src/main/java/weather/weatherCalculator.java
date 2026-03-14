@@ -10,10 +10,9 @@ import java.util.Random;
 public class weatherCalculator {
     Random rng;
     Random yearRng = new Random();
-    Random monthRng = new Random();;
+    Random monthRng = new Random();
     int bonusWind = 0, bonusRain = 0, bonusTemp = 0;
 
-    // Global events loaded from additional-events.yaml
     private List<GlobalEvent> globalEvents = new java.util.ArrayList<>();
 
     public weatherCalculator(Random rng) { this.rng = rng; }
@@ -115,11 +114,15 @@ public class weatherCalculator {
         }
     }
 
-    public String generateEvents(LinkedList<event> regionEvents, List<GlobalEvent> globalEvents, int month, int wind, double temperature) {
+    public String generateEvents(LinkedList<GlobalEvent> regionEvents, List<GlobalEvent> globalEvents, int month, int wind, double temperature) {
         StringBuilder result = new StringBuilder();
-        Logger.log(LogLevel.DEBUG, 2, "Num of Global events " + globalEvents.size());
 
-        for (GlobalEvent e : globalEvents) {
+        // Merge and process uniformly
+        List<GlobalEvent> allEvents = new java.util.ArrayList<>(globalEvents);
+        allEvents.addAll(regionEvents);
+        Logger.log(LogLevel.DEBUG, 2, "Checking " + allEvents.size() + " events (" + globalEvents.size() + " global, " + regionEvents.size() + " regional)");
+
+        for (GlobalEvent e : allEvents) {
             Logger.log(LogLevel.DEBUG, 2, "Checking event: " + e.getName());
             if (e.conditionsMet(month, wind, temperature) && chance(e.getOccurs(), e.getDays())) {
                 int variantIdx = e.hasVariants() ? rng.nextInt(e.getVariantCount()) : 0;
@@ -130,16 +133,6 @@ public class weatherCalculator {
                 bonusTemp += e.getBonusTemp();
                 bonusRain += e.getBonusRain();
             }
-        }
-        for (event e : regionEvents) {
-            Logger.log(LogLevel.DEBUG, 2, "Checking event: " + e.getName());
-            if (chance(e.getOccurs(), e.getDays())) {
-                if (result.isEmpty()) result.append(e.getName());
-                else { result.append(", "); result.append(e.getName()); }
-            }
-            bonusWind += e.getBonusWind();
-            bonusTemp += e.getBonusTemp();
-            bonusRain += e.getbonusRain();
         }
         return result.toString();
     }
@@ -171,47 +164,58 @@ public class weatherCalculator {
                 getNonRandomDirection());
     }
 
-    /**
-     * Generates 24 hourly values for temperature, wind, and rain for a given day.
-     * Uses a seeded RNG so the same day always produces the same hourly pattern.
-     * Returns a double[3][24] where [0]=temperature, [1]=wind, [2]=rain.
-     */
     public double[][] getHourlyWeather(int year, int month, int day, nationData nation) {
         weather daily = getWeather(year, month, day, nation);
         double dailyTemp = daily.getTemperature();
         int dailyWind    = daily.getWindStrength();
         int dailyRain    = daily.getRain();
 
-        // Seed per day so results are deterministic
         Random hourRng = new Random(daySeed(year, month, day) * 31L + 7 + Math.abs(nation.getName().hashCode()));
 
         double[] temps = new double[24];
         double[] winds = new double[24];
         double[] rains = new double[24];
 
-        // Temperature: smooth sine-like curve peaking at hour 14, lowest at hour 4
-        // plus small seeded noise
+        // Base swing ±(3-5 degrees) + half the region's temperature_drop
+        // drop_speed stretches the night cold period — higher = faster drop, longer cold spell
+        double baseSwing = 3.0 + hourRng.nextDouble() * 2.0;
+        double swing     = baseSwing + nation.getTemperatureDrop() / 2.0;
+        double dropSpeed = nation.getDropSpeed();
         for (int h = 0; h < 24; h++) {
-            double angle = Math.PI * 2 * (h - 4) / 24.0;
-            double curve = Math.sin(angle) * 3.0; // ±3 degree swing
-            double noise = (hourRng.nextDouble() - 0.5) * 2.0; // ±1 noise
+            // Peak at hour 14, trough at hour 4
+            // dropSpeed compresses the warm hours and stretches the cold hours
+            double t = (h - 14.0) / 24.0; // -0.5 to 0.5, 0 = peak
+            double angle;
+            if (dropSpeed <= 0) {
+                angle = 2 * Math.PI * t;
+            } else {
+                // Stretch the negative (cold) half by dropSpeed factor
+                // warm half: t in [-0.5+shift, 0+shift], compressed
+                // cold half: t in [0, 0.5], stretched
+                double stretch = 1.0 + dropSpeed / 3.0; // e.g. drop_speed=3 -> stretch=2
+                if (t >= 0) {
+                    // After peak — stretch time so it cools faster
+                    angle = Math.PI * Math.min(t * stretch, 1.0);
+                } else {
+                    // Before peak — compress warm period
+                    double warmFraction = 1.0 - (1.0 / (1.0 + dropSpeed / 6.0));
+                    angle = -Math.PI * Math.min(-t / (0.5 - warmFraction * 0.4), 1.0);
+                }
+            }
+            double curve = Math.sin(angle) * swing;
+            double noise = (hourRng.nextDouble() - 0.5) * 2.0;
             temps[h] = dailyTemp + curve + noise;
         }
 
-        // Wind: random walk clamped around daily value
         double wind = dailyWind;
         for (int h = 0; h < 24; h++) {
             wind += (hourRng.nextDouble() - 0.5) * 2.0;
             wind = Math.max(0, Math.min(wind, dailyWind * 2.0 + 4));
-            // Drift back toward daily value
             wind += (dailyWind - wind) * 0.15;
             winds[h] = wind;
         }
 
-        // Rain: 0 if daily rain is 0, otherwise random variation around daily
-        if (dailyRain == 0) {
-            // All zeros
-        } else {
+        if (dailyRain > 0) {
             for (int h = 0; h < 24; h++) {
                 double r = dailyRain + (hourRng.nextDouble() - 0.5) * dailyRain * 0.8;
                 rains[h] = Math.max(0, r);
@@ -220,5 +224,4 @@ public class weatherCalculator {
 
         return new double[][]{ temps, winds, rains };
     }
-
 }
