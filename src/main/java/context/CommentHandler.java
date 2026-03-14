@@ -1,6 +1,5 @@
 package context;
 
-import org.yaml.snakeyaml.Yaml;
 import gui.GuiApp;
 import gui.Localization;
 
@@ -8,6 +7,8 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Saves and loads day comments to/from comments.yaml
@@ -39,16 +40,46 @@ public class CommentHandler {
             return comments;
         }
 
-        try (FileInputStream fis = new FileInputStream(file)) {
-            Yaml yaml = new Yaml();
-            Object raw = yaml.load(fis);
-            if (raw instanceof Map) {
-                Map<?, ?> data = (Map<?, ?>) raw;
-                for (Map.Entry<?, ?> entry : data.entrySet()) {
-                    String key   = String.valueOf(entry.getKey());
-                    String value = entry.getValue() != null ? entry.getValue().toString() : "";
-                    if (!value.isEmpty()) comments.put(key, value);
+        // Parse line by line to avoid SnakeYAML auto-parsing dates like 2977-11-21 into Date objects.
+        // Supports both quoted keys ("2977-11-21": ...) and unquoted (2977-11-21: ...)
+        Pattern pattern = Pattern.compile("^\"?([\\w\\-]+)\"?:\\s*(.*)$");
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            String currentKey = null;
+            StringBuilder currentVal = new StringBuilder();
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("  ") || line.startsWith("\t")) {
+                    // Continuation of block scalar
+                    if (currentKey != null) {
+                        if (currentVal.length() > 0) currentVal.append("\n");
+                        currentVal.append(line.stripLeading());
+                    }
+                    continue;
                 }
+                // Save previous key before starting a new one
+                if (currentKey != null) {
+                    String val = currentVal.toString().trim();
+                    if (!val.isEmpty()) comments.put(currentKey, val);
+                    currentKey = null;
+                    currentVal.setLength(0);
+                }
+                line = line.trim();
+                if (line.isEmpty()) continue;
+                Matcher m = pattern.matcher(line);
+                if (m.matches()) {
+                    currentKey = m.group(1).trim();
+                    String val = m.group(2).trim();
+                    if (val.equals("|")) {
+                        // Block scalar — value comes on following indented lines
+                    } else {
+                        currentVal.append(val);
+                    }
+                }
+            }
+            // Save last entry
+            if (currentKey != null) {
+                String val = currentVal.toString().trim();
+                if (!val.isEmpty()) comments.put(currentKey, val);
             }
             Logger.log(LogLevel.INFO, 1, "Loaded " + comments.size() + " comments.");
         } catch (IOException e) {
@@ -75,10 +106,17 @@ public class CommentHandler {
             StringBuilder sb = new StringBuilder();
             toSave.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
-                .forEach(e -> sb
-                    .append(e.getKey()).append(": ")
-                    .append(e.getValue().replace("\n", " ").trim())
-                    .append("\n"));
+                .forEach(e -> {
+                    String val = e.getValue().trim();
+                    if (val.contains("\n")) {
+                        // Block scalar — indent each line with 2 spaces
+                        sb.append("\"").append(e.getKey()).append("\": |\n");
+                        for (String line : val.split("\n", -1))
+                            sb.append("  ").append(line).append("\n");
+                    } else {
+                        sb.append("\"").append(e.getKey()).append("\": ").append(val).append("\n");
+                    }
+                });
             Files.writeString(Path.of(commentsPath), sb.toString());
             Logger.log(LogLevel.INFO, 1, "Saved " + toSave.size() + " comments.");
         } catch (IOException e) {
@@ -125,25 +163,34 @@ public class CommentHandler {
             return new SessionState(defaultYear, defaultMonth, defaultDay, defaultNation, "SV");
         }
 
-        try (FileInputStream fis = new FileInputStream(file)) {
-            Yaml yaml = new Yaml();
-            Object raw = yaml.load(fis);
-            if (raw instanceof Map) {
-                Map<?, ?> data = (Map<?, ?>) raw;
-                int year      = parseIntOrDefault(data.get("year"),   defaultYear);
-                int month     = parseIntOrDefault(data.get("month"),  defaultMonth);
-                int day       = parseIntOrDefault(data.get("day"),    defaultDay);
-                String nation = parseStrOrDefault(data.get("nation"), defaultNation);
-                String lang   = parseStrOrDefault(data.get("lang"),   "SV");
-                Logger.log(LogLevel.INFO, 1, "Loaded session: " + nation + " " + year + "-" + month + "-" + day + " [" + lang + "]");
-                return new SessionState(year, month, day, nation, lang);
+        // Parse session.yaml line by line for same reason as comments
+        int year = defaultYear, month = defaultMonth, day = defaultDay;
+        String nation = defaultNation, lang = "SV";
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) continue;
+                String[] parts = line.split(":\\s*", 2);
+                if (parts.length != 2) continue;
+                String k = parts[0].trim();
+                String v = parts[1].trim().replace("\"", "");
+                switch (k) {
+                    case "year"   -> year   = parseIntOrDefault(v, defaultYear);
+                    case "month"  -> month  = parseIntOrDefault(v, defaultMonth);
+                    case "day"    -> day    = parseIntOrDefault(v, defaultDay);
+                    case "nation" -> nation = v.isEmpty() ? defaultNation : v;
+                    case "lang"   -> lang   = v.isEmpty() ? "SV" : v;
+                }
             }
+            Logger.log(LogLevel.INFO, 1, "Loaded session: " + nation + " " + year + "-" + month + "-" + day + " [" + lang + "]");
         } catch (IOException e) {
             Logger.log(LogLevel.WARNING, 1, "Error loading session: " + e.getMessage());
             e.printStackTrace();
         }
 
-        return new SessionState(defaultYear, defaultMonth, defaultDay, defaultNation, "SV");
+        return new SessionState(year, month, day, nation, lang);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────
