@@ -1,13 +1,22 @@
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import context.CommentHandler;
+import context.LogLevel;
+import context.Logger;
+import context.SessionState;
+import context.TxtToYamlConverter;
+import context.fileHandler;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
 import gui.GuiApp;
+import gui.Localization;
 import weather.*;
 
 public class Launcher extends Application {
@@ -19,22 +28,34 @@ public class Launcher extends Application {
     static int start_month = 7;
     static int start_year  = 2977;
     static int until_year  = 2961;
+    LogLevel myLogLevel = LogLevel.DEBUG;
 
     @Override
     public void start(Stage primaryStage) {
-        Logger.log(LogLevel.INFO, 0, "Step 0: Path is \"" + path + "\"");
+    	// Redirect stderr to a file so errors are never lost
+    	try {
+    	    PrintStream errLog = new PrintStream(new FileOutputStream(path + "/error.log", true));
+    	    System.setErr(errLog);
+    	} catch (Exception e) { /* ignore */ }
+    	Logger.setLevel(myLogLevel);
+    	
+    	Logger.log(LogLevel.INFO, 0, "Step 0: Path is \"" + path + "\"");
 
-        // Convert .txt files to .yaml if no .yaml files exist yet
-        String dataPath = path + "/src/data";
+        String dataPath = path + "/src/data/eon";
+        Logger.log(LogLevel.INFO, 1, "Path to data folder is" + path + "\\data");
         File dataFolder = new File(dataPath);
         File[] yamlFiles = dataFolder.listFiles((dir, name) -> name.endsWith(".yaml"));
+        Logger.log(LogLevel.DEBUG, 1, "Found " + yamlFiles.length + " files:");
+        for(int i = 0; i<yamlFiles.length-1;i++) {
+        	Logger.log(LogLevel.DEBUG, 2, yamlFiles[i].toString());
+        }
         if (yamlFiles == null || yamlFiles.length == 0) {
             Logger.log(LogLevel.INFO, 1, "No YAML files found — converting .txt files...");
             TxtToYamlConverter.convertAll(path);
         }
 
         Logger.log(LogLevel.INFO, 0, "Step 1: Loading Data Files");
-        fileHandler filehandler = new fileHandler(path);
+        fileHandler filehandler = new fileHandler(dataPath);
 
         Logger.log(LogLevel.INFO, 0, "Step 2: Loading Global Events");
         List<GlobalEvent> globalEvents = GlobalEventLoader.load(path);
@@ -48,9 +69,10 @@ public class Launcher extends Application {
 
         Logger.log(LogLevel.INFO, 0, "Step 5: Loading comments");
         CommentHandler commentHandler = new CommentHandler(path);
-
-        // Load session state — falls back to static defaults if no session file exists
         SessionState session = commentHandler.loadSession(start_year, start_month, start_day, nation);
+
+        // Apply saved language using string — avoids any enum casting issues in bytecode
+        Localization.setLangFromString(session.lang);
 
         Logger.log(LogLevel.INFO, 0, "Step 6: Setting up data");
         LinkedList<weather> list_of_weather = new LinkedList<weather>();

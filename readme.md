@@ -91,3 +91,9 @@ The Datafiles are built to use YAML and are thus fairly readable.
 (event name)
 
 (# times per);(x days)
+
+# How to compile
+1. Start by running maven build (goal: clean package)
+2. Remove the DIST folder in the file structure
+3. run build-dist.ps1
+4. runt dist\run.bat

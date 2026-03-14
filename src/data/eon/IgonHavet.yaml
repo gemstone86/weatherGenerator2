@@ -1,0 +1,68 @@
+name: "Igonhavet"
+
+temperature:
+  jan: 12
+  feb: 14
+  mar: 16
+  apr: 20
+  may: 24
+  jun: 22
+  jul: 18
+  aug: 16
+  sep: 15
+  oct: 12
+  nov: 10
+  dec: 9
+
+precipitation:
+  jan: 0
+  feb: 0
+  mar: 0
+  apr: 0
+  may: 0
+  jun: 0
+  jul: 0
+  aug: 0
+  sep: 0
+  oct: 0
+  nov: 0
+  dec: 0
+
+shift: 0
+
+wind:
+  jan: 1
+  feb: 1
+  mar: 1
+  apr: 0
+  may: 1
+  jun: 1
+  jul: 1
+  aug: 1
+  sep: 1
+  oct: 2
+  nov: 2
+  dec: 1
+
+events:
+  - name: "Drake"
+    occurs: 1
+    days: 1000
+  - name: "Skugglandsvarelser"
+    occurs: 1
+    days: 250
+  - name: "Havsfolksattack"
+    occurs: 1
+    days: 150
+  - name: "Magistorm (Hydrotropi 5)"
+    occurs: 1
+    days: 100
+  - name: "Magistorm (Hydrotropi 10)"
+    occurs: 1
+    days: 200
+  - name: "Magistorm (Hydrotropi 15)"
+    occurs: 1
+    days: 400
+  - name: "Magistorm (Hydrotropi 20)"
+    occurs: 1
+    days: 800
