@@ -40,6 +40,7 @@ public class Localization {
             case "weather.wind":      return "Vindstyrka";
             case "weather.rain":      return "Regnmängd";
             case "title":             return "Eon Vädergenerator";
+            case "button.graph":      return "Dygnsgraf";
             default:                  return "?" + key + "?";
         }
     }
@@ -62,6 +63,7 @@ public class Localization {
             case "weather.wind":      return "Wind strength";
             case "weather.rain":      return "Rainfall";
             case "title":             return "Eon Weather Generator";
+            case "button.graph":      return "Day Graph";
             default:                  return "?" + key + "?";
         }
     }

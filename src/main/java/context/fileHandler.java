@@ -82,7 +82,7 @@ public class fileHandler {
      * Load all .yaml files from the data folder.
      */
     public void initializeDataFiles() {
-        String folderPath = basePath + "/src/data";
+        String folderPath = basePath;
         File folder = new File(folderPath);
         File[] files = folder.listFiles((dir, name) -> name.endsWith(".yaml"));
 

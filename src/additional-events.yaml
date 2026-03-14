@@ -34,7 +34,7 @@ events:
     start_month: 10
     end_month: 2
     bonus_wind: 0
-    bonus_temp: -5
+    bonus_temp: -10
     bonus_rain: 0
 
   - name: "Värmevåg"
@@ -43,7 +43,7 @@ events:
     start_month: 4
     end_month: 8
     bonus_wind: 0
-    bonus_temp: 5
+    bonus_temp: 10
     bonus_rain: 0
 
   - name: "Molnklart"

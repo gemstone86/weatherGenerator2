@@ -20,6 +20,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import context.CommentHandler;
+import gui.Lang;
 import gui.Localization;
 import context.LogLevel;
 import context.Logger;
@@ -53,13 +54,16 @@ public class GuiApp {
     weatherCalculator newCalc;
 
     Label areaLabel, weatherLabel, miscLabel, commentLabel, dayLabel, monthLabel, yearLabel;
-    Button printToFile, langToggle, graphToggle;
+    Button printToFile, langToggle;
     Stage primaryStage;
     TextField weatherData, otherEffects;
     Canvas graphCanvas;
-    boolean graphVisible = false;
-    static final int GRAPH_WIDTH = 300;
-    static final int GRAPH_HEIGHT = 400;
+    private int windowWidth = 900; 
+    private int windowHeight = 600;
+    static final int GRAPH_WIDTH = 400;
+    static final int GRAPH_HEIGHT = 500;
+    
+    
 
     public GuiApp(fileHandler fileHandler, final LinkedList<weather> listOfWeather,
                   int start_year, int start_month, int start_day, String nation, Stage primaryStage,
@@ -115,21 +119,27 @@ public class GuiApp {
         Button dayUp   = new Button("+");
         Button dayDown = new Button("-");
         dayLabel = new Label(Localization.get("label.day"));
-        HBox dayBox = new HBox(4, dayLabel, dayDown, displayDay, dayUp);
+        HBox dayControls = new HBox(4, dayDown, displayDay, dayUp);
+        dayControls.setAlignment(Pos.CENTER);
+        VBox dayBox = new VBox(2, dayLabel, dayControls);
         dayBox.setAlignment(Pos.CENTER);
 
         // ── Month controls ────────────────────────────────────────────────
         Button monthUp   = new Button("+");
         Button monthDown = new Button("-");
         monthLabel = new Label(Localization.get("label.month"));
-        HBox monthBox = new HBox(4, monthLabel, monthDown, displayMonth, monthUp);
+        HBox monthControls = new HBox(4, monthDown, displayMonth, monthUp);
+        monthControls.setAlignment(Pos.CENTER);
+        VBox monthBox = new VBox(2, monthLabel, monthControls);
         monthBox.setAlignment(Pos.CENTER);
 
         // ── Year controls ─────────────────────────────────────────────────
         Button yearUp   = new Button("+");
         Button yearDown = new Button("-");
         yearLabel = new Label(Localization.get("label.year"));
-        HBox yearBox = new HBox(4, yearLabel, yearDown, displayYear, yearUp);
+        HBox yearControls = new HBox(4, yearDown, displayYear, yearUp);
+        yearControls.setAlignment(Pos.CENTER);
+        VBox yearBox = new VBox(2, yearLabel, yearControls);
         yearBox.setAlignment(Pos.CENTER);
 
         HBox dateControls = new HBox(16, dayBox, monthBox, yearBox);
@@ -147,7 +157,7 @@ public class GuiApp {
         commentLabel = new Label(Localization.get("label.comment"));
         commentBox = new TextArea();
         commentBox.setPromptText(Localization.get("prompt.comment"));
-        commentBox.setPrefHeight(80);
+        commentBox.setPrefHeight(200);
         commentBox.setWrapText(true);
         VBox commentArea = new VBox(4, commentLabel, commentBox);
         commentArea.setAlignment(Pos.BOTTOM_CENTER);
@@ -155,21 +165,18 @@ public class GuiApp {
         // ── Buttons ───────────────────────────────────────────────────────
         printToFile  = new Button(Localization.get("button.printfile"));
         langToggle   = new Button(Localization.get("button.lang"));
-        graphToggle  = new Button(Localization.get("button.graph"));
 
         // ── Graph panel ───────────────────────────────────────────────────
         graphCanvas = new Canvas(GRAPH_WIDTH, GRAPH_HEIGHT);
         VBox graphPanel = new VBox(graphCanvas);
         graphPanel.setPadding(new Insets(8));
-        graphPanel.setStyle("-fx-border-color: #cccccc; -fx-border-width: 0 0 0 1;");
-        graphPanel.setVisible(false);
-        graphPanel.setManaged(false);
+        graphPanel.setStyle("-fx-background-color: white; -fx-border-color: #aaaaaa; -fx-border-width: 0 0 0 1;");
 
         // ── Root layout ───────────────────────────────────────────────────
         VBox center = new VBox(12, areaBox, dateControls, weatherDisplay, commentArea);
         center.setPadding(new Insets(12));
 
-        HBox bottomBar = new HBox(8, langToggle, graphToggle, printToFile);
+        HBox bottomBar = new HBox(8, langToggle, printToFile);
         bottomBar.setAlignment(Pos.CENTER_RIGHT);
         bottomBar.setPadding(new Insets(8));
 
@@ -207,16 +214,8 @@ public class GuiApp {
             commentHandler.saveSession(year, month, day, dropDownNations.getValue());
         });
 
-        graphToggle.setOnAction(e -> {
-            graphVisible = !graphVisible;
-            graphPanel.setVisible(graphVisible);
-            graphPanel.setManaged(graphVisible);
-            primaryStage.sizeToScene();
-            if (graphVisible) drawGraph();
-        });
-
-        // ── Show stage ────────────────────────────────────────────────────
-        Scene scene = new Scene(root, 750, 470);
+// ── Show stage ────────────────────────────────────────────────────
+        Scene scene = new Scene(root, windowWidth, windowHeight);
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -236,7 +235,6 @@ public class GuiApp {
         commentBox.setPromptText(Localization.get("prompt.comment"));
         printToFile.setText(Localization.get("button.printfile"));
         langToggle.setText(Localization.get("button.lang"));
-        graphToggle.setText(Localization.get("button.graph"));
     }
 
     public void updateWeather(LinkedList<weather> weatherList) {
@@ -253,7 +251,7 @@ public class GuiApp {
 
         weatherData.setText(text);
         otherEffects.setText(test.getOther());
-        if (graphVisible) drawGraph();
+        drawGraph();
     }
 
     public String getDaySeed() {

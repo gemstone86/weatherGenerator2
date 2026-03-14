@@ -180,7 +180,7 @@ public class weatherCalculator {
         int dailyRain    = daily.getRain();
 
         // Seed per day so results are deterministic
-        Random hourRng = new Random(daySeed(year, month, day) * 31L + 7);
+        Random hourRng = new Random(daySeed(year, month, day) * 31L + 7 + Math.abs(nation.getName().hashCode()));
 
         double[] temps = new double[24];
         double[] winds = new double[24];
