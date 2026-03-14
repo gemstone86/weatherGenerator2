@@ -45,7 +45,7 @@ wind:
   dec: 1
 
 events:
-  - name: "Dragon"
+  - name: "Drake"
     occurs: 1
     days: 1000
   - name: "Starka vindar (+3 alstra pneumotropi)"

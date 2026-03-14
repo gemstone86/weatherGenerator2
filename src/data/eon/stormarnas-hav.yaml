@@ -45,9 +45,9 @@ wind:
   dec: 3
 
 events:
-  - name: "Dragon"
+  - name: "Drake"
     occurs: 1
-    days: 200
+    days: 1000
   - name: "Magistorm (Hydrotropi 5)"
     occurs: 1
     days: 100

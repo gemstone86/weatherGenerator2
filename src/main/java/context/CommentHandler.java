@@ -9,6 +9,11 @@ import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Saves and loads day comments to/from comments.yaml
+ * Keys are date strings (e.g. "2977-7-1"), values are comment strings.
+ * Creates a backup of the previous comments.yaml to comments-bak.yaml before each save.
+ */
 public class CommentHandler {
 
     private final String commentsPath;

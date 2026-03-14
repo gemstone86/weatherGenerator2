@@ -45,7 +45,7 @@ wind:
   dec: 0
 
 events:
-  - name: "Dragon"
+  - name: "Drake"
     occurs: 1
     days: 1000
   - name: "Skugglandsvarelser"
@@ -60,9 +60,9 @@ events:
   - name: "Forandrade"
     occurs: 1
     days: 200
-  - name: "Rauner"
+  - name: "Raunisk Räd"
     occurs: 1
-    days: 150
+    days: 100
   - name: "Troll"
     occurs: 1
     days: 200

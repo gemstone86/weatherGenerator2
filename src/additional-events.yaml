@@ -1,10 +1,16 @@
 events:
-  - name: "Åska"
+  - name: "Lätt Åska"
     occurs: 1
     days: 28
     bonus_wind: 0
     bonus_temp: 0
     bonus_rain: 0
+
+  - name: "Svår Åska"
+    occurs: 1
+    days: 2
+    start_month: 8
+    end_month: 1
 
   - name: "Lätt Dimma"
     occurs: 1

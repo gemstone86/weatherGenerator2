@@ -70,17 +70,30 @@ public class GlobalEvent {
     }
 
     public boolean conditionsMet(int month, int wind, double temperature) {
-        if (wind < minWind) { Logger.log(LogLevel.DEBUG, 2, "is below min wind: " + wind + "/"+minWind); return false; }
-        if (wind > maxWind) { Logger.log(LogLevel.DEBUG, 2, "is above max wind: " + wind + "/"+maxWind); return false; }
-        if (temperature < minTemperature) { Logger.log(LogLevel.DEBUG, 2, "is below min temperature: " + temperature + "/"+minTemperature); return false; }
-        if (temperature > maxTemperature) { Logger.log(LogLevel.DEBUG, 2, "is above max temperature: " + temperature + "/"+minTemperature); return false; }
+        if (wind < minWind) { Logger.log(LogLevel.DEBUG, 3, "wind is below min wind: " + wind + "/"+minWind); return false; }
+        if (wind > maxWind) { Logger.log(LogLevel.DEBUG, 3, "wind is above max wind: " + wind + "/"+maxWind); return false; }
+        else { Logger.log(LogLevel.DEBUG, 3, "wind is within: " +minWind +"<"+ wind + "<"+maxWind); }
+        if (temperature < minTemperature) { Logger.log(LogLevel.DEBUG, 3, "temperature is below min temperature: " + temperature + " / "+minTemperature); return false; }
+        if (temperature > maxTemperature) { Logger.log(LogLevel.DEBUG, 3, "temperature is above max temperature: " + temperature + " / "+maxTemperature); return false; }
+        else { Logger.log(LogLevel.DEBUG, 3, "temperature is within: " +minTemperature +"<"+ temperature + "<"+maxTemperature); }
+        Logger.log(LogLevel.DEBUG, 3, "Month is " +startMonth +" < " + month + " < "+endMonth);
         
-        if (startMonth != 0 && endMonth != 0) {
-            if (startMonth <= endMonth) {
+        // there is a startmonth or endmonth
+        if (startMonth != 0 && endMonth != 13) {
+        	Logger.log(LogLevel.DEBUG, 3, "Specific months defined for event");
+        	// if start and end is on the same year (i.e. January to March)
+        	if (startMonth <= endMonth) {
                 if (month < startMonth || month > endMonth) return false;
-            } else {
+                else { Logger.log(LogLevel.DEBUG, 3, "month is within: " +startMonth +"<="+ month + "<="+endMonth); }
+            } 
+        	// start is on the year before the end month (i.e. December to January)
+        	else {
                 if (month < startMonth && month > endMonth) return false;
+                Logger.log(LogLevel.DEBUG, 3, "month is within: " +endMonth +"<="+ month + "<="+startMonth);
             }
+        }
+        else {
+        	
         }
 
         return true;

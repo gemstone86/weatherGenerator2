@@ -45,6 +45,6 @@ wind:
   dec: 0
 
 events:
-  - name: "Dragon"
+  - name: "Drake"
     occurs: 1
     days: 1000

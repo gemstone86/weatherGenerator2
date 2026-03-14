@@ -35,7 +35,7 @@ public class GlobalEventLoader {
                 int occurs     = getInt(e, "occurs", 1);
                 int days       = getInt(e, "days", 365);
                 int startMonth = getInt(e, "start_month", 0);
-                int endMonth   = getInt(e, "end_month", 0);
+                int endMonth   = getInt(e, "end_month", 13);
                 int minWind    = getInt(e, "min_wind", 0);
                 int maxWind    = getInt(e, "max_wind", 999);
                 int bonusWind  = getInt(e, "bonus_wind", 0);
