@@ -13,7 +13,7 @@ events:
     bonus_temp: -2
     bonus_rain: 0
     min_wind: 0
-    max_wind: 2
+    max_wind: 3
     min_temp: 0
     max_temp: 25
 
@@ -24,7 +24,7 @@ events:
     bonus_temp: -2
     bonus_rain: 0
     min_wind: 0
-    max_wind: 1
+    max_wind: 4
     min_temp: -5
     max_temp: 20
 

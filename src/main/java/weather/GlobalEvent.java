@@ -1,6 +1,10 @@
 package weather;
 
 import java.util.List;
+
+import context.LogLevel;
+import context.Logger;
+
 import java.util.ArrayList;
 
 /**
@@ -31,7 +35,7 @@ public class GlobalEvent {
     public GlobalEvent(String name, List<String> variants, int occurs, int days,
                        int startMonth, int endMonth,
                        int minWind, int maxWind,
-                       int bonusWind, int bonusTemp, int bonusRain, double maxTemperature, double minTemperature) {
+                       int bonusWind, int bonusTemp, int bonusRain, double minTemperature, double maxTemperature) {
         this.name       = name;
         this.variants   = variants != null ? variants : new ArrayList<>();
         this.occurs     = occurs;
@@ -66,8 +70,10 @@ public class GlobalEvent {
     }
 
     public boolean conditionsMet(int month, int wind, double temperature) {
-        if (wind < minWind || wind > maxWind) return false;
-        if (temperature < minTemperature || temperature > maxTemperature) return false;
+        if (wind < minWind) { Logger.log(LogLevel.DEBUG, 2, "is below min wind: " + wind + "/"+minWind); return false; }
+        if (wind > maxWind) { Logger.log(LogLevel.DEBUG, 2, "is above max wind: " + wind + "/"+maxWind); return false; }
+        if (temperature < minTemperature) { Logger.log(LogLevel.DEBUG, 2, "is below min temperature: " + temperature + "/"+minTemperature); return false; }
+        if (temperature > maxTemperature) { Logger.log(LogLevel.DEBUG, 2, "is above max temperature: " + temperature + "/"+minTemperature); return false; }
         
         if (startMonth != 0 && endMonth != 0) {
             if (startMonth <= endMonth) {
