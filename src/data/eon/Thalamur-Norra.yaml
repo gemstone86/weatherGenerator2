@@ -1,0 +1,50 @@
+name: "Thalamur (Norra)"
+
+temperature:
+  jan: -8
+  feb: -6
+  mar: 0
+  apr: 6
+  may: 14
+  jun: 16
+  jul: 21
+  aug: 22
+  sep: 21
+  oct: 17
+  nov: 15
+  dec: 2
+
+precipitation:
+  jan: 0
+  feb: 0
+  mar: 0
+  apr: 0
+  may: 0
+  jun: 0
+  jul: 0
+  aug: 0
+  sep: 0
+  oct: 0
+  nov: 0
+  dec: 0
+
+shift: 0
+
+wind:
+  jan: 0
+  feb: 0
+  mar: 0
+  apr: 0
+  may: 0
+  jun: 0
+  jul: 0
+  aug: 0
+  sep: 0
+  oct: 0
+  nov: 0
+  dec: 0
+
+events:
+  - name: "Drake"
+    occurs: 1
+    days: 1000
