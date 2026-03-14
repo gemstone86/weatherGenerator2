@@ -133,10 +133,13 @@ public class weatherCalculator {
         }
         for (event e : regionEvents) {
             Logger.log(LogLevel.DEBUG, 2, "Checking event: " + e.getName());
-            if (chance(1 + e.getOccurs(), e.getDays())) {
+            if (chance(e.getOccurs(), e.getDays())) {
                 if (result.isEmpty()) result.append(e.getName());
                 else { result.append(", "); result.append(e.getName()); }
             }
+            bonusWind += e.getBonusWind();
+            bonusTemp += e.getBonusTemp();
+            bonusRain += e.getbonusRain();
         }
         return result.toString();
     }

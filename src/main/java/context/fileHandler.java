@@ -55,7 +55,10 @@ public class fileHandler {
                     String name = (String) e.get("name");
                     int occurs = (int) e.get("occurs");
                     int days = (int) e.get("days");
-                    events.add(new event(name, occurs, days));
+                    int bonusWind  = getInt(e, "bonus_wind", 0);
+                    int bonusTemp  = getInt(e, "bonus_temp", 0);
+                    int bonusRain  = getInt(e, "bonus_rain", 0);
+                    events.add(new event(name, occurs, days, bonusWind, bonusTemp, bonusRain));
                 }
             }
 
@@ -68,6 +71,12 @@ public class fileHandler {
         return null;
     }
 
+    private static int getInt(Map<String, Object> map, String key, int defaultVal) {
+        Object val = map.get(key);
+        if (val == null) return defaultVal;
+        return (int) val;
+    }
+    
     private int[] mapToMonthArray(Map<String, Integer> map) {
         String[] keys = {"jan", "feb", "mar", "apr", "may", "jun",
                          "jul", "aug", "sep", "oct", "nov", "dec"};

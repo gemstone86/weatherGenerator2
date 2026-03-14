@@ -38,11 +38,11 @@ public class GlobalEventLoader {
                 int endMonth   = getInt(e, "end_month", 13);
                 int minWind    = getInt(e, "min_wind", 0);
                 int maxWind    = getInt(e, "max_wind", 999);
+                double minTemperature = getInt(e, "min_temp", -999);
+                double maxTemperature = getInt(e, "max_temp", 999);
                 int bonusWind  = getInt(e, "bonus_wind", 0);
                 int bonusTemp  = getInt(e, "bonus_temp", 0);
                 int bonusRain  = getInt(e, "bonus_rain", 0);
-                double minTemperature = getInt(e, "min_temp", -999);
-                double maxTemperature = getInt(e, "max_temp", 999);
 
                 // Load optional variant list
                 List<String> variants = new ArrayList<>();

@@ -38,7 +38,7 @@ public class Localization {
             case "button.lang":       return "English";
             case "weather.temp":      return "Temperatur";
             case "weather.wind":      return "Vindstyrka";
-            case "weather.rain":      return "Regnmängd";
+            case "weather.rain":      return "Nederbörd";
             case "title":             return "Eon Vädergenerator";
             case "button.graph":      return "Dygnsgraf";
             default:                  return "?" + key + "?";
@@ -61,7 +61,7 @@ public class Localization {
             case "button.lang":       return "Svenska";
             case "weather.temp":      return "Temperature";
             case "weather.wind":      return "Wind strength";
-            case "weather.rain":      return "Rainfall";
+            case "weather.rain":      return "Precipitation";
             case "title":             return "Eon Weather Generator";
             case "button.graph":      return "Day Graph";
             default:                  return "?" + key + "?";
