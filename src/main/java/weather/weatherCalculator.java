@@ -13,13 +13,20 @@ public class weatherCalculator {
     Random rng;
     Random yearRng = new Random();
     Random monthRng = new Random();
+    int dateSerial;
     int bonusWind = 0, bonusRain = 0, bonusTemp = 0;
 
     private List<GlobalEvent> globalEvents = new java.util.ArrayList<>();
     private List<ReligiousDate> religiousDates = new java.util.ArrayList<>();
 
-    public weatherCalculator(Random rng) { this.rng = rng; }
+    public weatherCalculator(Random rng) { 
+    	this.rng = rng; 
+    }
 
+    public void setDateSerial(int serial) {
+    	dateSerial = serial;
+    }
+    
     public void setGlobalEvents(List<GlobalEvent> events) { this.globalEvents = events; }
     public void setReligiousDates(List<ReligiousDate> dates) { this.religiousDates = dates; }
     public void setYearSeed(int n) { yearRng.setSeed(n); }
@@ -234,5 +241,50 @@ public class weatherCalculator {
         }
         return sb.toString();
     }
+    
+    public int getDateSerial() {
+    	return dateSerial;
+    }
+    public int calculateDateSerial(int year, int month, int day) {
+    	return (year-1) * (12*28) + (month-1)*28 + day;
+    }
+    
+    private int getDay() {
+        return ((dateSerial - (((dateSerial - 1) / 336 + 1) - 1) * 336) - 1) % 28 + 1;
+    }
+    private int getMonth() {
+        int year = (dateSerial - 1) / 336 + 1;
+
+        int dayOfYear = dateSerial - (year - 1) * 336;
+
+        int month = (dayOfYear - 1) / 28 + 1;
+
+        return month;
+    }
+    private int getYear() {
+        return (dateSerial - 1) / 336 + 1;
+    }
+    
+    public static int[] serialToDate(int serial) {
+        int year = (serial - 1) / 336 + 1;
+
+        int dayOfYear = serial - (year - 1) * 336;
+
+        int month = (dayOfYear - 1) / 28 + 1;
+        int day = (dayOfYear - 1) % 28 + 1;
+
+        return new int[]{year, month, day};
+    }
+    
+    public void updateDateSerial(int i) {
+    	dateSerial += i;
+    	Logger.log(LogLevel.INFO, 2, "dateSerial is: " + getDateSerial());
+    	Logger.log(LogLevel.INFO, 2, "day should be: " + getDay() + ", Month should be: " + getMonth() + ", Year should be: " + getYear());
+    }
+
+	public String getDate() {
+		// TODO Auto-generated method stub
+		return getYear() + "-" + getMonth() + "-" + getDay() + " (" + Localization.get("day." + ((getDay() % 7) + 1)) + ")";
+	}
 
 }

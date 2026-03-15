@@ -61,6 +61,7 @@ public class Launcher extends Application {
 
         Logger.log(LogLevel.INFO, 0, "Step 4: Setting up calculator");
         weatherCalculator calculator = new weatherCalculator(new Random(3118725));
+        calculator.setDateSerial(calculator.calculateDateSerial(start_year, start_month, start_day));
         calculator.setGlobalEvents(globalEvents);
 
         Logger.log(LogLevel.INFO, 0, "Step 5a: Loading Important Dates");
@@ -71,6 +72,8 @@ public class Launcher extends Application {
         CommentHandler commentHandler = new CommentHandler(path);
         SessionState session = commentHandler.loadSession(start_year, start_month, start_day, nation);
 
+        calculator.setDateSerial(calculator.calculateDateSerial(session.year, session.month, session.day));
+        
         // Apply saved language using string — avoids any enum casting issues in bytecode
         Localization.setLangFromString(session.lang);
 

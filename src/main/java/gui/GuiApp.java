@@ -35,6 +35,8 @@ public class GuiApp {
     static int day = 1;
     static int month = 1;
 
+    
+    
     int start_year;
     int start_month;
     int start_day;
@@ -46,6 +48,7 @@ public class GuiApp {
     nationData nationData;
     fileHandler fileHandler;
     ComboBox<String> dropDownNations;
+    ComboBox<String> calendarSystem;
     String[] listOfNations;
 
     HashMap<String, String> comments = new HashMap<>();
@@ -53,9 +56,10 @@ public class GuiApp {
 
     weatherCalculator newCalc;
 
-    Label areaLabel, weatherLabel, miscLabel, commentLabel, dayLabel, monthLabel, yearLabel;
+    Label calendarLabel, areaLabel, dateLabel, weatherLabel, miscLabel, commentLabel, dayLabel, monthLabel, yearLabel;
     Button printToFile, langToggle;
     Stage primaryStage;
+    TextField date;
     TextField weatherData;
     TextArea miscTextBox;
     Canvas graphCanvas;
@@ -94,9 +98,16 @@ public class GuiApp {
         dropDownNations.getSelectionModel().select(nation);
         if (dropDownNations.getSelectionModel().getSelectedIndex() < 0)
             dropDownNations.getSelectionModel().selectFirst();
+        
+        calendarSystem = new ComboBox<>();
+        calendarSystem.getItems().add("Jargisk");
+        calendarSystem.getItems().add("Dvärgisk");
+        calendarSystem.getSelectionModel().selectFirst();
+        
 
         areaLabel = new Label(Localization.get("label.area"));
-        HBox areaBox = new HBox(8, areaLabel, dropDownNations);
+        calendarLabel = new Label(Localization.get("label.calendar"));
+        HBox areaBox = new HBox(8, areaLabel, dropDownNations, calendarLabel, calendarSystem);
         areaBox.setAlignment(Pos.CENTER);
 
         // ── Display fields ────────────────────────────────────────────────
@@ -108,7 +119,13 @@ public class GuiApp {
             tf.setEditable(false);
         }
 
+        date = new TextField();
+        date.setAlignment(Pos.CENTER);
+        date.setPrefWidth(320);
+        date.setEditable(false);
+        
         weatherData = new TextField();
+        weatherData.setAlignment(Pos.CENTER);
         weatherData.setPrefWidth(320);
         weatherData.setEditable(false);
 
@@ -150,10 +167,13 @@ public class GuiApp {
         dateControls.setAlignment(Pos.CENTER);
         dateControls.setPadding(new Insets(8));
 
+        // ── Date display ───────────────────────────────────────────────
+        dateLabel = new Label(Localization.get("label.date"));
+        
         // ── Weather display ───────────────────────────────────────────────
         weatherLabel = new Label(Localization.get("label.weather"));
         miscLabel    = new Label(Localization.get("label.misc"));
-        VBox weatherDisplay = new VBox(4, weatherLabel, weatherData, miscLabel, miscTextBox);
+        VBox weatherDisplay = new VBox(4, date, weatherLabel, weatherData, miscLabel, miscTextBox);
         weatherDisplay.setAlignment(Pos.CENTER_LEFT);
         weatherDisplay.setPadding(new Insets(8));
 
@@ -191,6 +211,7 @@ public class GuiApp {
 
         // ── Event handlers ────────────────────────────────────────────────
         dropDownNations.setOnAction(e -> updateWeather(listOfWeather));
+        calendarSystem.setOnAction(e -> date.setText(newCalc.getDate()));
 
         yearUp.setOnAction(e ->    { updateYear(1);    updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather); });
         yearDown.setOnAction(e ->  { updateYear(-1);   updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather); });
@@ -217,6 +238,7 @@ public class GuiApp {
             Logger.log(LogLevel.DEBUG, 1, "saving year-month-day: " + year + "-" + month + "-" + day);
             commentHandler.saveSession(year, month, day, dropDownNations.getValue());
         });
+        date.setText(newCalc.getDate());
 
 // ── Show stage ────────────────────────────────────────────────────
         Scene scene = new Scene(root, windowWidth, windowHeight);
@@ -248,7 +270,7 @@ public class GuiApp {
         weather test = newCalc.getWeather(year, month, day, nationData);
         DecimalFormat df = new DecimalFormat("##");
 
-        String text = 	Localization.get("day." + ((day % 7) + 1)) + ": " + Localization.get("weather.temp") + ": " + df.format(test.getTemperature()) + "C"
+        String text = Localization.get("weather.temp") + ": " + df.format(test.getTemperature()) + "C"
                 + "   " + Localization.get("weather.wind") + ": " + test.getWindStrength()
                 + " (" + test.getDirection() + ")"
                 + "   " + Localization.get("weather.rain") + ": " + test.getRain();
@@ -271,25 +293,31 @@ public class GuiApp {
     }
 
     public void updateDay(int in) {
-        oldComment();
+    	oldComment();
         day += in;
+        newCalc.updateDateSerial(in);
         if (day > 28) { day = 1;  updateMonth(1); }
         else if (day < 1) { day = 28; updateMonth(-1); }
         nextComment();
+        date.setText(newCalc.getDate());
     }
 
     public void updateMonth(int in) {
         oldComment();
         month += in;
+        newCalc.updateDateSerial(in*28);
         if (month > 12) { month -= 12; updateYear(1); }
         else if (month < 1) { month += 12; updateYear(-1); }
         nextComment();
+        date.setText(newCalc.getDate());
     }
 
     public void updateYear(int in) {
         oldComment();
         year += in;
+        newCalc.updateDateSerial(in*28*12);
         nextComment();
+        date.setText(newCalc.getDate());
     }
 
     private void updateDisplays(TextField displayYear, TextField displayMonth, TextField displayDay) {

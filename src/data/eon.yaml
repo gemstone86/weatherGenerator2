@@ -1,0 +1,26 @@
+  - name: "Jargiska Kalendern"
+    division:
+      - name: "Januari"
+	    days: 28
+      - name: "Februari"
+        days: 28
+      - name: "Mars"
+        days: 28
+      - name: "April"
+        days: 28
+      - name: "Maj"
+        days: 28
+      - name: "Juni"
+        days: 28
+      - name: "Juli"
+        days: 28
+      - name: "Augusti"
+        days: 28
+      - name: "September"
+        days: 28
+      - name: "Oktober"
+        days: 28
+      - name: "November"
+        days: 28
+      - name: "December"
+        days: 28
