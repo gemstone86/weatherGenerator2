@@ -5,7 +5,6 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-
 import context.CommentHandler;
 import context.ImportantDatesLoader;
 import context.LogLevel;
@@ -16,46 +15,41 @@ import context.TxtToYamlConverter;
 import context.fileHandler;
 import javafx.application.Application;
 import javafx.stage.Stage;
-
 import gui.GuiApp;
 import gui.Localization;
 import weather.*;
 
 public class Launcher extends Application {
-
     String path = Paths.get("").toAbsolutePath().toString();
-
     static String nation   = "Colonan";
     static int start_day   = 1;
     static int start_month = 7;
     static int start_year  = 2977;
     static int until_year  = 2961;
-    LogLevel myLogLevel = LogLevel.INFO;
+    static LogLevel myLogLevel = LogLevel.INFO;
 
     @Override
     public void start(Stage primaryStage) {
-    	// Redirect stderr to a file so errors are never lost
-    	try {
-    	    PrintStream errLog = new PrintStream(new FileOutputStream(path + "/error.log", true));
-    	    System.setErr(errLog);
-    	} catch (Exception e) { /* ignore */ }
-    	Logger.setLevel(myLogLevel);
-    	
-    	Logger.log(LogLevel.INFO, 0, "Step 0: Path is \"" + path + "\"");
+        // Redirect stderr to a file so errors are never lost
+        try {
+            PrintStream errLog = new PrintStream(new FileOutputStream(path + "/error.log", true));
+            System.setErr(errLog);
+        } catch (Exception e) { /* ignore */ }
+        Logger.setLevel(myLogLevel);
 
+        Logger.log(LogLevel.INFO, 0, "Step 0: Path is \"" + path + "\"");
         String dataPath = path + "/src/data/eon";
         Logger.log(LogLevel.INFO, 1, "Path to data folder is" + path + "\\data");
         File dataFolder = new File(dataPath);
         File[] yamlFiles = dataFolder.listFiles((dir, name) -> name.endsWith(".yaml"));
         Logger.log(LogLevel.DEBUG, 1, "Found " + yamlFiles.length + " files:");
-        for(int i = 0; i<yamlFiles.length-1;i++) {
-        	Logger.log(LogLevel.DEBUG, 2, yamlFiles[i].toString());
+        for (int i = 0; i < yamlFiles.length - 1; i++) {
+            Logger.log(LogLevel.DEBUG, 2, yamlFiles[i].toString());
         }
         if (yamlFiles == null || yamlFiles.length == 0) {
             Logger.log(LogLevel.INFO, 1, "No YAML files found — converting .txt files...");
             TxtToYamlConverter.convertAll(path);
         }
-
         Logger.log(LogLevel.INFO, 0, "Step 1: Loading Data Files");
         fileHandler filehandler = new fileHandler(dataPath);
 
@@ -91,7 +85,43 @@ public class Launcher extends Application {
     }
 
     public static void main(String[] args) {
-        if (args.length > 0) nation = args[0];
+
+        for (int i = 0; i < args.length; i++) {
+
+            switch (args[i].toLowerCase()) {
+
+                case "-loglevel":
+                    if (i + 1 < args.length) {
+                        String level = args[++i].toLowerCase();
+
+                        switch (level) {
+                            case "debug":
+                                myLogLevel = LogLevel.DEBUG;
+                                break;
+
+                            case "warning":
+                                myLogLevel = LogLevel.WARNING;
+                                break;
+
+                            case "all":
+                                myLogLevel = LogLevel.ALL;
+                                break;
+
+                            default:
+                                Logger.log(LogLevel.WARNING, 0, "Unknown log level: " + level);
+                        }
+
+                    } else {
+                        Logger.log(LogLevel.WARNING, 0, "-loglevel requires a value");
+                    }
+                    break;
+
+                default:
+                    Logger.log(LogLevel.WARNING, 0, "Unknown parameter: " + args[i]);
+            }
+        }
+
+        Logger.log(myLogLevel, 0, "Logging level set to " + myLogLevel);
         launch(args);
     }
 }
