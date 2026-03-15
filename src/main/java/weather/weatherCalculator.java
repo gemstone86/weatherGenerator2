@@ -161,7 +161,7 @@ public class weatherCalculator {
         int wind = windStrengthFractal(year, month, averageWind);
         double temperature = getProceduralTemperature(previous, average, next, day);
         String events = generateEvents(nation.getEvents(), globalEvents, month, wind, temperature);
-        events = appendReligiousDates(events, month, day);
+        events = appendReligiousDates(events, year, month, day);
         temperature += bonusTemp;
         bonusTemp = 0;
         return new weather(year, month, day, temperature, wind,
@@ -217,10 +217,10 @@ public class weatherCalculator {
         return new double[][]{ temps, winds, rains };
     }
 
-    private String appendReligiousDates(String events, int month, int day) {
+    private String appendReligiousDates(String events, int year, int month, int day) {
         StringBuilder sb = new StringBuilder(events);
         for (ReligiousDate rd : religiousDates) {
-            if (rd.matches(month, day)) {
+            if (rd.matches(year, month, day)) {
                 String tierKey = switch (rd.tier) {
                     case HOLIEST   -> "tier.holiest";
                     case HOLY      -> "tier.holy";

@@ -31,13 +31,23 @@ religions:
       - name: "Nimtomäss"
         month: "5"
         day: "15"
-      - name: "Alla själars dag"
-        month: "12"
-        day: "15"
       - name: "Zorianmäss"
         month: "9"
         day: "8"
+      - name: "Ramsalmäss"
+        month: "11"
+        day: "15"
+      - name: "Aurias och Pelias Dag"
+        repeat_months: 1
+        start_month: 1
+        start_day: 1
     unholy_days:
       - name: "Dagbryt"
         month: "2"
         day: "7"
+  - name: "Vontartron"
+    holy_days:
+      - name: "åttondedag"
+        repeat_days: 8
+        start_month: 1
+        start_day: 2

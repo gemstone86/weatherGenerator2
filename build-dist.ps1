@@ -33,12 +33,19 @@ if (-not (Test-Path $JarPath)) {
 Copy-Item $JarPath "$DistDir\eon-weather.jar"
 Write-Host "Copied JAR."
 
-# ── Copy data files ───────────────────────────────────────────
+# ── Copy all src/ data files (everything except .java source) ─
 New-Item -ItemType Directory -Path "$DistDir\src" | Out-Null
-Copy-Item "src\data" "$DistDir\src\data" -Recurse
-Copy-Item "src\additional-events.yaml" "$DistDir\src\additional-events.yaml"
+Get-ChildItem -Path "src" -Recurse | Where-Object {
+    -not $_.PSIsContainer -and $_.Extension -ne ".java" -and $_.Extension -ne ".class"
+} | ForEach-Object {
+    $dest = $_.FullName.Replace((Resolve-Path "src").Path, (Resolve-Path "$DistDir\src").Path)
+    $destDir = Split-Path $dest -Parent
+    if (-not (Test-Path $destDir)) { New-Item -ItemType Directory -Path $destDir -Force | Out-Null }
+    Copy-Item $_.FullName $dest
+}
+# Ensure comments dir exists for runtime use
 New-Item -ItemType Directory -Path "$DistDir\src\comments" -Force | Out-Null
-Write-Host "Copied data files."
+Write-Host "Copied src data files."
 
 # ── Extract JavaFX JARs from the fat JAR into javafx/ ─────────
 Write-Host "Extracting JavaFX JARs from fat JAR..."
