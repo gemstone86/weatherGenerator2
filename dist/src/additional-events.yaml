@@ -1,10 +1,17 @@
 events:
-  - name: "Åska"
+  - name: "Lätt Åska"
     occurs: 1
     days: 28
+    affected_by: "rain"
     bonus_wind: 0
     bonus_temp: 0
     bonus_rain: 0
+
+  - name: "Svår Åska"
+    occurs: 1
+    days: 84
+    start_month: 8
+    end_month: 1
 
   - name: "Lätt Dimma"
     occurs: 1
@@ -13,7 +20,7 @@ events:
     bonus_temp: -2
     bonus_rain: 0
     min_wind: 0
-    max_wind: 2
+    max_wind: 3
     min_temp: 0
     max_temp: 25
 
@@ -24,7 +31,7 @@ events:
     bonus_temp: -2
     bonus_rain: 0
     min_wind: 0
-    max_wind: 1
+    max_wind: 4
     min_temp: -5
     max_temp: 20
 

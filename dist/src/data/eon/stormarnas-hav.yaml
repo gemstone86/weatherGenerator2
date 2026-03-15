@@ -14,6 +14,9 @@ temperature:
   nov: 10
   dec: 9
 
+temperature_drop: 2
+drop_speed: 1
+
 precipitation:
   jan: 1
   feb: 0
@@ -45,9 +48,9 @@ wind:
   dec: 3
 
 events:
-  - name: "Dragon"
+  - name: "Drake"
     occurs: 1
-    days: 200
+    days: 1000
   - name: "Magistorm (Hydrotropi 5)"
     occurs: 1
     days: 100

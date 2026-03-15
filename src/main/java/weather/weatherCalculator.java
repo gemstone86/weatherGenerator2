@@ -2,6 +2,8 @@ package weather;
 
 import context.Logger;
 import context.LogLevel;
+import context.ReligiousDate;
+import gui.Localization;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -14,10 +16,12 @@ public class weatherCalculator {
     int bonusWind = 0, bonusRain = 0, bonusTemp = 0;
 
     private List<GlobalEvent> globalEvents = new java.util.ArrayList<>();
+    private List<ReligiousDate> religiousDates = new java.util.ArrayList<>();
 
     public weatherCalculator(Random rng) { this.rng = rng; }
 
     public void setGlobalEvents(List<GlobalEvent> events) { this.globalEvents = events; }
+    public void setReligiousDates(List<ReligiousDate> dates) { this.religiousDates = dates; }
     public void setYearSeed(int n) { yearRng.setSeed(n); }
     public void setMonthSeed(int n) { monthRng.setSeed(n); }
     public void setSeed(int n) { rng.setSeed(n); }
@@ -157,6 +161,7 @@ public class weatherCalculator {
         int wind = windStrengthFractal(year, month, averageWind);
         double temperature = getProceduralTemperature(previous, average, next, day);
         String events = generateEvents(nation.getEvents(), globalEvents, month, wind, temperature);
+        events = appendReligiousDates(events, month, day);
         temperature += bonusTemp;
         bonusTemp = 0;
         return new weather(year, month, day, temperature, wind,
@@ -177,34 +182,21 @@ public class weatherCalculator {
         double[] rains = new double[24];
 
         // Base swing ±(3-5 degrees) + half the region's temperature_drop
-        // drop_speed stretches the night cold period — higher = faster drop, longer cold spell
+        // drop_speed: 0 = smooth sine, higher = sharper drop and longer cold spell
         double baseSwing = 3.0 + hourRng.nextDouble() * 2.0;
         double swing     = baseSwing + nation.getTemperatureDrop() / 2.0;
         double dropSpeed = nation.getDropSpeed();
+        // exponent < 1 sharpens peaks and flattens troughs on a sine:
+        // we apply it to a normalised 0..1 version then restore sign
+        double exponent = 1.0 / (1.0 + dropSpeed / 3.0); // drop_speed=3 -> exp=0.5
         for (int h = 0; h < 24; h++) {
-            // Peak at hour 14, trough at hour 4
-            // dropSpeed compresses the warm hours and stretches the cold hours
-            double t = (h - 14.0) / 24.0; // -0.5 to 0.5, 0 = peak
-            double angle;
-            if (dropSpeed <= 0) {
-                angle = 2 * Math.PI * t;
-            } else {
-                // Stretch the negative (cold) half by dropSpeed factor
-                // warm half: t in [-0.5+shift, 0+shift], compressed
-                // cold half: t in [0, 0.5], stretched
-                double stretch = 1.0 + dropSpeed / 3.0; // e.g. drop_speed=3 -> stretch=2
-                if (t >= 0) {
-                    // After peak — stretch time so it cools faster
-                    angle = Math.PI * Math.min(t * stretch, 1.0);
-                } else {
-                    // Before peak — compress warm period
-                    double warmFraction = 1.0 - (1.0 / (1.0 + dropSpeed / 6.0));
-                    angle = -Math.PI * Math.min(-t / (0.5 - warmFraction * 0.4), 1.0);
-                }
-            }
-            double curve = Math.sin(angle) * swing;
-            double noise = (hourRng.nextDouble() - 0.5) * 2.0;
-            temps[h] = dailyTemp + curve + noise;
+            double angle = Math.PI * 2 * (h - 4) / 24.0; // trough at h=4, peak at h=16
+            double sinVal = Math.sin(angle);
+            // Apply exponent to absolute value, restore sign
+            // exponent < 1 makes the curve spend more time near the extremes
+            double shaped = Math.signum(sinVal) * Math.pow(Math.abs(sinVal), exponent);
+            double noise  = (hourRng.nextDouble() - 0.5) * 2.0;
+            temps[h] = dailyTemp + shaped * swing + noise;
         }
 
         double wind = dailyWind;
@@ -224,4 +216,23 @@ public class weatherCalculator {
 
         return new double[][]{ temps, winds, rains };
     }
+
+    private String appendReligiousDates(String events, int month, int day) {
+        StringBuilder sb = new StringBuilder(events);
+        for (ReligiousDate rd : religiousDates) {
+            if (rd.matches(month, day)) {
+                String tierKey = switch (rd.tier) {
+                    case HOLIEST   -> "tier.holiest";
+                    case HOLY      -> "tier.holy";
+                    case UNHOLY    -> "tier.unholy";
+                    case UNHOLIEST -> "tier.unholiest";
+                };
+                String entry = rd.religion + " - " + Localization.get(tierKey) + ": " + rd.name;
+                if (sb.length() > 0) sb.append(", ");
+                sb.append(entry);
+            }
+        }
+        return sb.toString();
+    }
+
 }

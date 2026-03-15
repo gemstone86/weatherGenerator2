@@ -41,6 +41,17 @@ public class Localization {
             case "weather.rain":      return "Nederbörd";
             case "title":             return "Eon Vädergenerator";
             case "button.graph":      return "Dygnsgraf";
+            case "day.1":			  return "Söndag";
+            case "day.2":			  return "Måndag";
+            case "day.3":			  return "Tisdag";
+            case "day.4":			  return "Onsdag";
+            case "day.5":			  return "Torsdag";
+            case "day.6":			  return "Fredag";
+            case "day.7":			  return "Lördag";
+            case "tier.holiest":      return "Heligaste dag";
+            case "tier.holy":         return "Helig dag";
+            case "tier.unholy":       return "Ohelig dag";
+            case "tier.unholiest":    return "Oheligaste dag";
             default:                  return "?" + key + "?";
         }
     }
@@ -64,6 +75,17 @@ public class Localization {
             case "weather.rain":      return "Precipitation";
             case "title":             return "Eon Weather Generator";
             case "button.graph":      return "Day Graph";
+            case "day.1":			  return "Sunday";
+            case "day.2":			  return "Monday";
+            case "day.3":			  return "Tuseday";
+            case "day.4":			  return "Wednesday";
+            case "day.5":			  return "Thursday";
+            case "day.6":			  return "Friday";
+            case "day.7":			  return "Saturday";
+            case "tier.holiest":      return "Holiest day";
+            case "tier.holy":         return "Holy day";
+            case "tier.unholy":       return "Unholy Day";
+            case "tier.unholiest":    return "Unholies Day";
             default:                  return "?" + key + "?";
         }
     }

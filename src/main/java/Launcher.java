@@ -7,8 +7,10 @@ import java.util.List;
 import java.util.Random;
 
 import context.CommentHandler;
+import context.ImportantDatesLoader;
 import context.LogLevel;
 import context.Logger;
+import context.ReligiousDate;
 import context.SessionState;
 import context.TxtToYamlConverter;
 import context.fileHandler;
@@ -28,7 +30,7 @@ public class Launcher extends Application {
     static int start_month = 7;
     static int start_year  = 2977;
     static int until_year  = 2961;
-    LogLevel myLogLevel = LogLevel.DEBUG;
+    LogLevel myLogLevel = LogLevel.INFO;
 
     @Override
     public void start(Stage primaryStage) {
@@ -67,7 +69,11 @@ public class Launcher extends Application {
         weatherCalculator calculator = new weatherCalculator(new Random(3118725));
         calculator.setGlobalEvents(globalEvents);
 
-        Logger.log(LogLevel.INFO, 0, "Step 5: Loading comments");
+        Logger.log(LogLevel.INFO, 0, "Step 5a: Loading Important Dates");
+        List<ReligiousDate> importantDates = ImportantDatesLoader.load(path);
+        calculator.setReligiousDates(importantDates);
+
+        Logger.log(LogLevel.INFO, 0, "Step 5b: Loading comments");
         CommentHandler commentHandler = new CommentHandler(path);
         SessionState session = commentHandler.loadSession(start_year, start_month, start_day, nation);
 

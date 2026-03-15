@@ -56,7 +56,8 @@ public class GuiApp {
     Label areaLabel, weatherLabel, miscLabel, commentLabel, dayLabel, monthLabel, yearLabel;
     Button printToFile, langToggle;
     Stage primaryStage;
-    TextField weatherData, otherEffects;
+    TextField weatherData;
+    TextArea miscTextBox;
     Canvas graphCanvas;
     private int windowWidth = 900; 
     private int windowHeight = 600;
@@ -111,9 +112,12 @@ public class GuiApp {
         weatherData.setPrefWidth(320);
         weatherData.setEditable(false);
 
-        otherEffects = new TextField();
-        otherEffects.setPrefWidth(420);
-        otherEffects.setEditable(false);
+        // ── Event box controls ──────────────────────────────────────────────────
+        miscTextBox = new TextArea();
+        miscTextBox.setWrapText(true);
+        miscTextBox.setPrefHeight(100);
+        miscTextBox.setPrefWidth(420);
+        miscTextBox.setEditable(false);
 
         // ── Day controls ──────────────────────────────────────────────────
         Button dayUp   = new Button("+");
@@ -149,7 +153,7 @@ public class GuiApp {
         // ── Weather display ───────────────────────────────────────────────
         weatherLabel = new Label(Localization.get("label.weather"));
         miscLabel    = new Label(Localization.get("label.misc"));
-        VBox weatherDisplay = new VBox(4, weatherLabel, weatherData, miscLabel, otherEffects);
+        VBox weatherDisplay = new VBox(4, weatherLabel, weatherData, miscLabel, miscTextBox);
         weatherDisplay.setAlignment(Pos.CENTER_LEFT);
         weatherDisplay.setPadding(new Insets(8));
 
@@ -244,13 +248,13 @@ public class GuiApp {
         weather test = newCalc.getWeather(year, month, day, nationData);
         DecimalFormat df = new DecimalFormat("##");
 
-        String text = Localization.get("weather.temp") + ": " + df.format(test.getTemperature()) + "C"
+        String text = 	Localization.get("day." + ((day % 7) + 1)) + ": " + Localization.get("weather.temp") + ": " + df.format(test.getTemperature()) + "C"
                 + "   " + Localization.get("weather.wind") + ": " + test.getWindStrength()
                 + " (" + test.getDirection() + ")"
                 + "   " + Localization.get("weather.rain") + ": " + test.getRain();
 
         weatherData.setText(text);
-        otherEffects.setText(test.getOther());
+        miscTextBox.setText(test.getOther());
         drawGraph();
     }
 

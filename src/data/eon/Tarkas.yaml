@@ -15,7 +15,7 @@ temperature:
   dec: 17
 
 temperature_drop: 15
-drop_speed: 3
+drop_speed: 6
 
 precipitation:
   jan: -1
