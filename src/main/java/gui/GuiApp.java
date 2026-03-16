@@ -293,11 +293,13 @@ public class GuiApp {
     }
 
     public void updateDay(int in) {
-    	oldComment();
+        oldComment();
         day += in;
-        newCalc.updateDateSerial(in);
-        if (day > 28) { day = 1;  updateMonth(1); }
-        else if (day < 1) { day = 28; updateMonth(-1); }
+        if (day > 28) { day = 1;  month++; }
+        else if (day < 1) { day = 28; month--; }
+        if (month > 12) { month -= 12; year++; }
+        else if (month < 1) { month += 12; year--; }
+        newCalc.setDateSerial(newCalc.calculateDateSerial(year, month, day));
         nextComment();
         date.setText(newCalc.getDate());
     }
@@ -305,9 +307,9 @@ public class GuiApp {
     public void updateMonth(int in) {
         oldComment();
         month += in;
-        newCalc.updateDateSerial(in*28);
-        if (month > 12) { month -= 12; updateYear(1); }
-        else if (month < 1) { month += 12; updateYear(-1); }
+        if (month > 12) { month -= 12; year++; }
+        else if (month < 1) { month += 12; year--; }
+        newCalc.setDateSerial(newCalc.calculateDateSerial(year, month, day));
         nextComment();
         date.setText(newCalc.getDate());
     }
@@ -315,7 +317,7 @@ public class GuiApp {
     public void updateYear(int in) {
         oldComment();
         year += in;
-        newCalc.updateDateSerial(in*28*12);
+        newCalc.setDateSerial(newCalc.calculateDateSerial(year, month, day));
         nextComment();
         date.setText(newCalc.getDate());
     }

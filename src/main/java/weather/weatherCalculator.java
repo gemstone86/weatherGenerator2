@@ -3,6 +3,7 @@ package weather;
 import context.Logger;
 import context.LogLevel;
 import context.ReligiousDate;
+import date.Calendar;
 import gui.Localization;
 
 import java.util.LinkedList;
@@ -16,6 +17,9 @@ public class weatherCalculator {
     int dateSerial;
     int bonusWind = 0, bonusRain = 0, bonusTemp = 0;
 
+    //Calendar jargien = new Calendar(this, new int[] {336, 12, 28}, 0);
+    Calendar jargien = new Calendar(this, new int[] {336, 42, 8}, 7015*336-140);
+    
     private List<GlobalEvent> globalEvents = new java.util.ArrayList<>();
     private List<ReligiousDate> religiousDates = new java.util.ArrayList<>();
 
@@ -249,42 +253,42 @@ public class weatherCalculator {
     	return (year-1) * (12*28) + (month-1)*28 + day;
     }
     
-    private int getDay() {
-        return ((dateSerial - (((dateSerial - 1) / 336 + 1) - 1) * 336) - 1) % 28 + 1;
-    }
-    private int getMonth() {
-        int year = (dateSerial - 1) / 336 + 1;
-
-        int dayOfYear = dateSerial - (year - 1) * 336;
-
-        int month = (dayOfYear - 1) / 28 + 1;
-
-        return month;
-    }
-    private int getYear() {
-        return (dateSerial - 1) / 336 + 1;
-    }
-    
-    public static int[] serialToDate(int serial) {
-        int year = (serial - 1) / 336 + 1;
-
-        int dayOfYear = serial - (year - 1) * 336;
-
-        int month = (dayOfYear - 1) / 28 + 1;
-        int day = (dayOfYear - 1) % 28 + 1;
-
-        return new int[]{year, month, day};
-    }
+//    private int getDay() {
+//        return ((dateSerial - (((dateSerial - 1) / 336 + 1) - 1) * 336) - 1) % 28 + 1;
+//    }
+//    private int getMonth() {
+//        int year = (dateSerial - 1) / 336 + 1;
+//
+//        int dayOfYear = dateSerial - (year - 1) * 336;
+//
+//        int month = (dayOfYear - 1) / 28 + 1;
+//
+//        return month;
+//    }
+//    private int getYear() {
+//        return (dateSerial - 1) / 336 + 1;
+//    }
+//    
+//    public static int[] serialToDate(int serial) {
+//        int year = (serial - 1) / 336 + 1;
+//
+//        int dayOfYear = serial - (year - 1) * 336;
+//
+//        int month = (dayOfYear - 1) / 28 + 1;
+//        int day = (dayOfYear - 1) % 28 + 1;
+//
+//        return new int[]{year, month, day};
+//    }
     
     public void updateDateSerial(int i) {
     	dateSerial += i;
     	Logger.log(LogLevel.INFO, 2, "dateSerial is: " + getDateSerial());
-    	Logger.log(LogLevel.INFO, 2, "day should be: " + getDay() + ", Month should be: " + getMonth() + ", Year should be: " + getYear());
     }
 
 	public String getDate() {
 		// TODO Auto-generated method stub
-		return getYear() + "-" + getMonth() + "-" + getDay() + " (" + Localization.get("day." + ((getDay() % 7) + 1)) + ")";
+		return jargien.toString(dateSerial);
+		//return getYear() + "-" + getMonth() + "-" + getDay() + " (" + Localization.get("day." + ((getDay() % 7) + 1)) + ")";
 	}
 
 }
