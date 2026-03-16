@@ -9,6 +9,8 @@ public class Calendar {
     private int[] config;      // e.g. {336, 12, 28} as input
     private int[] unitSize;    // e.g. {336, 28, 1} — days per unit at each level
     private int epochOffset;
+    private String name;
+    private String[] unitNames;
     
     public Calendar(weatherCalculator calculator, int[] config, int epochOffset) {
         this.calculator = calculator;
@@ -23,6 +25,25 @@ public class Calendar {
         }
         // unitSize = {336, 28, 1} for standard calendar
     }
+
+    public Calendar(weatherCalculator calculator, String name,
+        String[] unitNames, int[] unitSize, int epochOffset) {
+    	this.calculator  = calculator;
+    	this.name        = name;
+    	this.unitNames   = unitNames;
+    	this.unitSize    = unitSize;
+    	this.epochOffset = epochOffset;
+    }
+    
+    public static Calendar fromConfig(weatherCalculator calc, String name,
+        String[] divNames, int[] config, int epochOffset) {
+    	int[] sizes = new int[config.length];
+    	sizes[0] = config[0];
+    	for (int i = 1; i < config.length; i++) {
+    		sizes[i] = sizes[i - 1] / config[i];
+    	}
+    	return new Calendar(calc, name, divNames, sizes, epochOffset);
+    	}
 
     public int[] toDate(int serial) {
         int adjusted = serial + epochOffset;
@@ -49,4 +70,9 @@ public class Calendar {
         int day = toDate(serial)[config.length - 1]; // last unit = day
         return Localization.get("day." + ((day % 7) + 1));
     }
+
+	public String getName() {
+		// TODO Auto-generated method stub
+		return name;
+	}
 }

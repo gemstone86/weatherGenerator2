@@ -25,6 +25,7 @@ import gui.Localization;
 import context.LogLevel;
 import context.Logger;
 import context.fileHandler;
+import date.Calendar;
 import weather.nationData;
 import weather.weather;
 import weather.weatherCalculator;
@@ -100,8 +101,11 @@ public class GuiApp {
             dropDownNations.getSelectionModel().selectFirst();
         
         calendarSystem = new ComboBox<>();
-        calendarSystem.getItems().add("Jargisk");
-        calendarSystem.getItems().add("Dvärgisk");
+       
+        
+        for(Calendar n : newCalc.getCalendars()) {
+        	calendarSystem.getItems().add(n.getName());
+        }
         calendarSystem.getSelectionModel().selectFirst();
         
 
@@ -301,7 +305,18 @@ public class GuiApp {
         else if (month < 1) { month += 12; year--; }
         newCalc.setDateSerial(newCalc.calculateDateSerial(year, month, day));
         nextComment();
-        date.setText(newCalc.getDate());
+        updateDate();
+    }
+    
+    public void updateDate() {
+    	String currentName = calendarSystem.getValue();
+    	
+        nation = listOfNations[dropDownNations.getSelectionModel().getSelectedIndex()];
+        nationData = fileHandler.getNation(nation);
+
+    	
+    	System.out.println(currentName);
+    	date.setText(newCalc.getDate());
     }
 
     public void updateMonth(int in) {
@@ -311,7 +326,7 @@ public class GuiApp {
         else if (month < 1) { month += 12; year--; }
         newCalc.setDateSerial(newCalc.calculateDateSerial(year, month, day));
         nextComment();
-        date.setText(newCalc.getDate());
+        updateDate();
     }
 
     public void updateYear(int in) {
@@ -319,7 +334,7 @@ public class GuiApp {
         year += in;
         newCalc.setDateSerial(newCalc.calculateDateSerial(year, month, day));
         nextComment();
-        date.setText(newCalc.getDate());
+        updateDate();
     }
 
     private void updateDisplays(TextField displayYear, TextField displayMonth, TextField displayDay) {

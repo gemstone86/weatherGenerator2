@@ -12,7 +12,9 @@ import context.Logger;
 import context.ReligiousDate;
 import context.SessionState;
 import context.TxtToYamlConverter;
+import context.calendarLoader;
 import context.fileHandler;
+import date.Calendar;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import gui.GuiApp;
@@ -58,10 +60,7 @@ public class Launcher extends Application {
 
         Logger.log(LogLevel.INFO, 0, "Step 3: Loading Weather File");
         filehandler.createWeatherFile(nation, start_year, until_year);
-        
-        Logger.log(LogLevel.INFO, 0, "Step 4: Loading Calendar File");
-        
-        
+  
         Logger.log(LogLevel.INFO, 0, "Step 5: Setting up calculator");
         weatherCalculator calculator = new weatherCalculator(new Random(3118725));
         calculator.setDateSerial(calculator.calculateDateSerial(start_year, start_month, start_day));
@@ -76,6 +75,10 @@ public class Launcher extends Application {
         SessionState session = commentHandler.loadSession(start_year, start_month, start_day, nation);
 
         calculator.setDateSerial(calculator.calculateDateSerial(session.year, session.month, session.day));
+
+        Logger.log(LogLevel.INFO, 0, "Step 4: Loading Calendar File");
+        List<Calendar> calendars = calendarLoader.load(path, calculator);
+        calculator.setCalendars(calendars);
         
         // Apply saved language using string — avoids any enum casting issues in bytecode
         Localization.setLangFromString(session.lang);

@@ -22,7 +22,8 @@ public class weatherCalculator {
     
     private List<GlobalEvent> globalEvents = new java.util.ArrayList<>();
     private List<ReligiousDate> religiousDates = new java.util.ArrayList<>();
-
+    private List<Calendar> calendars = new java.util.ArrayList<>();
+    
     public weatherCalculator(Random rng) { 
     	this.rng = rng; 
     }
@@ -290,5 +291,16 @@ public class weatherCalculator {
 		return jargien.toString(dateSerial);
 		//return getYear() + "-" + getMonth() + "-" + getDay() + " (" + Localization.get("day." + ((getDay() % 7) + 1)) + ")";
 	}
+	public String getDate(Calendar current) {
+		// TODO Auto-generated method stub
+		return current.toString(dateSerial);
+		//return getYear() + "-" + getMonth() + "-" + getDay() + " (" + Localization.get("day." + ((getDay() % 7) + 1)) + ")";
+	}
 
+	public void setCalendars(List<Calendar> calendars) { this.calendars = calendars; }
+		// TODO Auto-generated method stub
+
+	public List<Calendar> getCalendars() {
+		return calendars;
+	}
 }
