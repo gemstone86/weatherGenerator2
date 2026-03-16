@@ -26,8 +26,8 @@ import context.LogLevel;
 import context.Logger;
 import context.fileHandler;
 import date.Calendar;
-import weather.nationData;
-import weather.weather;
+import weather.Nation;
+import weather.Day;
 import weather.weatherCalculator;
 
 public class GuiApp {
@@ -46,7 +46,7 @@ public class GuiApp {
 
     TextArea commentBox;
 
-    nationData nationData;
+    Nation nationData;
     fileHandler fileHandler;
     ComboBox<String> dropDownNations;
     ComboBox<String> calendarSystem;
@@ -71,7 +71,7 @@ public class GuiApp {
     
     
 
-    public GuiApp(fileHandler fileHandler, final LinkedList<weather> listOfWeather,
+    public GuiApp(fileHandler fileHandler, final LinkedList<Day> listOfWeather,
                   int start_year, int start_month, int start_day, String nation, Stage primaryStage,
                   weatherCalculator newCalc, CommentHandler commentHandler) {
 
@@ -215,7 +215,7 @@ public class GuiApp {
 
         // ── Event handlers ────────────────────────────────────────────────
         dropDownNations.setOnAction(e -> updateWeather(listOfWeather));
-        calendarSystem.setOnAction(e -> date.setText(newCalc.getDate()));
+        calendarSystem.setOnAction(e -> updateDate());
 
         yearUp.setOnAction(e ->    { updateYear(1);    updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather); });
         yearDown.setOnAction(e ->  { updateYear(-1);   updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather); });
@@ -242,7 +242,7 @@ public class GuiApp {
             Logger.log(LogLevel.DEBUG, 1, "saving year-month-day: " + year + "-" + month + "-" + day);
             commentHandler.saveSession(year, month, day, dropDownNations.getValue());
         });
-        date.setText(newCalc.getDate());
+        updateDate();
 
 // ── Show stage ────────────────────────────────────────────────────
         Scene scene = new Scene(root, windowWidth, windowHeight);
@@ -267,11 +267,11 @@ public class GuiApp {
         langToggle.setText(Localization.get("button.lang"));
     }
 
-    public void updateWeather(LinkedList<weather> weatherList) {
+    public void updateWeather(LinkedList<Day> weatherList) {
         nation = listOfNations[dropDownNations.getSelectionModel().getSelectedIndex()];
         nationData = fileHandler.getNation(nation);
 
-        weather test = newCalc.getWeather(year, month, day, nationData);
+        Day test = newCalc.getWeather(year, month, day, nationData);
         DecimalFormat df = new DecimalFormat("##");
 
         String text = Localization.get("weather.temp") + ": " + df.format(test.getTemperature()) + "C"
@@ -309,14 +309,9 @@ public class GuiApp {
     }
     
     public void updateDate() {
-    	String currentName = calendarSystem.getValue();
-    	
-        nation = listOfNations[dropDownNations.getSelectionModel().getSelectedIndex()];
-        nationData = fileHandler.getNation(nation);
-
-    	
-    	System.out.println(currentName);
-    	date.setText(newCalc.getDate());
+        int idx = calendarSystem.getSelectionModel().getSelectedIndex();
+        Calendar activeCalendar = newCalc.getCalendars().get(idx);
+        date.setText(activeCalendar.toString(newCalc.getDateSerial()));
     }
 
     public void updateMonth(int in) {

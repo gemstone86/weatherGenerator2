@@ -163,7 +163,7 @@ public class weatherCalculator {
         }
     }
 
-    public weather getWeather(int year, int month, int day, nationData nation) {
+    public Day getWeather(int year, int month, int day, Nation nation) {
         int previous    = nation.getTemperature(month - 1);
         int average     = nation.getTemperature(month);
         int next        = nation.getTemperature(month + 1);
@@ -176,13 +176,13 @@ public class weatherCalculator {
         events = appendReligiousDates(events, year, month, day);
         temperature += bonusTemp;
         bonusTemp = 0;
-        return new weather(year, month, day, temperature, wind,
+        return new Day(year, month, day, temperature, wind,
                 rainfall(temperature, average, wind, rain), events,
                 getNonRandomDirection());
     }
 
-    public double[][] getHourlyWeather(int year, int month, int day, nationData nation) {
-        weather daily = getWeather(year, month, day, nation);
+    public double[][] getHourlyWeather(int year, int month, int day, Nation nation) {
+        Day daily = getWeather(year, month, day, nation);
         double dailyTemp = daily.getTemperature();
         int dailyWind    = daily.getWindStrength();
         int dailyRain    = daily.getRain();

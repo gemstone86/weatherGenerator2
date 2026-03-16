@@ -52,6 +52,7 @@ public class Localization {
             case "tier.holy":         return "Helig dag";
             case "tier.unholy":       return "Ohelig dag";
             case "tier.unholiest":    return "Oheligaste dag";
+            case "label.calendar":    return "Kalender";
             default:                  return "?" + key + "?";
         }
     }
@@ -86,6 +87,7 @@ public class Localization {
             case "tier.holy":         return "Holy day";
             case "tier.unholy":       return "Unholy Day";
             case "tier.unholiest":    return "Unholies Day";
+            case "label.calendar":    return "Calender";
             default:                  return "?" + key + "?";
         }
     }

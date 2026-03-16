@@ -2,7 +2,7 @@ package weather;
 
 import java.text.DecimalFormat;
 
-public class weather {
+public class Day {
 
 	private int Year, Month, Day;
     private double temperature;
@@ -11,7 +11,7 @@ public class weather {
     private String other;
     private direction direction;
 
-    public weather(int Year, int Month, int Day, double temp, int windStrength, int rain, String other, direction direction){
+    public Day(int Year, int Month, int Day, double temp, int windStrength, int rain, String other, direction direction){
         this.Year = Year; this.Month = Month; this.Day = Day;
         this.temperature = temp; this.windStrength = windStrength;
         this.other = other; this.rain = rain; this.direction = direction;

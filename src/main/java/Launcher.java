@@ -84,7 +84,7 @@ public class Launcher extends Application {
         Localization.setLangFromString(session.lang);
 
         Logger.log(LogLevel.INFO, 0, "Step 8: Setting up data");
-        LinkedList<weather> list_of_weather = new LinkedList<weather>();
+        LinkedList<Day> list_of_weather = new LinkedList<Day>();
         filehandler.addToFile(filehandler.printHeader(), true);
         filehandler.closeWeatherFile();
 

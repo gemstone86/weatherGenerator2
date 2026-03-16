@@ -2,7 +2,7 @@ package context;
 
 import org.yaml.snakeyaml.Yaml;
 import weather.GlobalEvent;
-import weather.nationData;
+import weather.Nation;
 
 import java.io.*;
 import java.text.DecimalFormat;
@@ -11,7 +11,7 @@ import java.util.*;
 public class fileHandler {
     String basePath;
     BufferedWriter bufferedWriter;
-    LinkedList<nationData> listOfNations = new LinkedList<nationData>();
+    LinkedList<Nation> listOfNations = new LinkedList<Nation>();
 
     public fileHandler(String Path) {
         this.basePath = Path;
@@ -20,7 +20,7 @@ public class fileHandler {
     }
 
     @SuppressWarnings("unchecked")
-    public nationData readYamlFile(String path) {
+    public Nation readYamlFile(String path) {
         File file = new File(path);
         try (FileInputStream fis = new FileInputStream(file)) {
             Yaml yaml = new Yaml();
@@ -70,7 +70,7 @@ public class fileHandler {
                 }
             }
 
-            return new nationData(nationName, temperature, rainfall, shift, windStrength, events, temperatureDrop, dropSpeed);
+            return new Nation(nationName, temperature, rainfall, shift, windStrength, events, temperatureDrop, dropSpeed);
 
         } catch (IOException e) {
             System.out.println("Couldn't read YAML file: " + path);
@@ -106,7 +106,7 @@ public class fileHandler {
 
         for (File f : files) {
             Logger.log(LogLevel.INFO, 3, "Loading: " + f.getName());
-            nationData nd = readYamlFile(f.getAbsolutePath());
+            Nation nd = readYamlFile(f.getAbsolutePath());
             if (nd != null) listOfNations.add(nd);
         }
     }
@@ -118,7 +118,7 @@ public class fileHandler {
         return list;
     }
 
-    public nationData getNation(String nation) {
+    public Nation getNation(String nation) {
         for (int i = 0; i < listOfNations.size(); i++)
             if (listOfNations.get(i).getName().equals(nation))
                 return listOfNations.get(i);
