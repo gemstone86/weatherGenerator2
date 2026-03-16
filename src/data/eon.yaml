@@ -1,15 +1,18 @@
+calendar:
   - name: "Jargiska Kalendern"
     division:
       - name: "År"
-	    days: 336
+        days: 336
       - name: "Månad"
-        days: 28
+        count: 12
       - name: "Dag"
-        days: 1
+        count: 28
   - name: "Dvärgiska Kalendern"
+    offset: 2356900
+    division:
       - name: "År"
         days: 336
       - name: "Vecka"
-        days: 8
+        count: 42
       - name: "Dag"
-        days: 1
+        count: 8

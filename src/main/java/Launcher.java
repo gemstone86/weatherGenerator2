@@ -56,19 +56,22 @@ public class Launcher extends Application {
         Logger.log(LogLevel.INFO, 0, "Step 2: Loading Global Events");
         List<GlobalEvent> globalEvents = GlobalEventLoader.load(path);
 
-        Logger.log(LogLevel.INFO, 0, "Step 3: Opening Weather File");
+        Logger.log(LogLevel.INFO, 0, "Step 3: Loading Weather File");
         filehandler.createWeatherFile(nation, start_year, until_year);
-
-        Logger.log(LogLevel.INFO, 0, "Step 4: Setting up calculator");
+        
+        Logger.log(LogLevel.INFO, 0, "Step 4: Loading Calendar File");
+        
+        
+        Logger.log(LogLevel.INFO, 0, "Step 5: Setting up calculator");
         weatherCalculator calculator = new weatherCalculator(new Random(3118725));
         calculator.setDateSerial(calculator.calculateDateSerial(start_year, start_month, start_day));
         calculator.setGlobalEvents(globalEvents);
 
-        Logger.log(LogLevel.INFO, 0, "Step 5a: Loading Important Dates");
+        Logger.log(LogLevel.INFO, 0, "Step 6: Loading Important Dates");
         List<ReligiousDate> importantDates = ImportantDatesLoader.load(path);
         calculator.setReligiousDates(importantDates);
 
-        Logger.log(LogLevel.INFO, 0, "Step 5b: Loading comments");
+        Logger.log(LogLevel.INFO, 0, "Step 7: Loading comments");
         CommentHandler commentHandler = new CommentHandler(path);
         SessionState session = commentHandler.loadSession(start_year, start_month, start_day, nation);
 
@@ -77,12 +80,12 @@ public class Launcher extends Application {
         // Apply saved language using string — avoids any enum casting issues in bytecode
         Localization.setLangFromString(session.lang);
 
-        Logger.log(LogLevel.INFO, 0, "Step 6: Setting up data");
+        Logger.log(LogLevel.INFO, 0, "Step 8: Setting up data");
         LinkedList<weather> list_of_weather = new LinkedList<weather>();
         filehandler.addToFile(filehandler.printHeader(), true);
         filehandler.closeWeatherFile();
 
-        Logger.log(LogLevel.INFO, 0, "Step 7: Starting JavaFX GUI");
+        Logger.log(LogLevel.INFO, 0, "Step 9: Starting JavaFX GUI");
         new GuiApp(filehandler, list_of_weather, session.year, session.month, session.day,
                    session.nation, primaryStage, calculator, commentHandler);
     }
