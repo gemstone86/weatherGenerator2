@@ -230,8 +230,8 @@ public class GuiApp {
         root.setBottom(bottomBar);
 
         // ── Event handlers ────────────────────────────────────────────────
-        dropDownNations.setOnAction(e -> updateWeather(listOfWeather));
-        calendarSystem.setOnAction(e -> updateDate());
+//        dropDownNations.setOnAction(e -> updateWeather(listOfWeather));
+//        calendarSystem.setOnAction(e -> updateDate());
 
         yearUp.setOnAction(e -> { updateYear(1); refreshGui(); });
         yearDown.setOnAction(e -> { updateYear(-1); refreshGui(); });
@@ -245,7 +245,7 @@ public class GuiApp {
         dropDownNations.setOnAction(e -> refreshGui());
         calendarSystem.setOnAction(e -> refreshGui());
 
-        printToFile.setOnAction(e -> {updateMonth(-1); updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather); });
+        printToFile.setOnAction(e -> { updateMonth(-1); refreshGui(); });
 
         langToggle.setOnAction(e -> { Localization.setLangFromString(Localization.getLang() == Lang.SV ? "EN" : "SV"); refreshGui(); });
 
@@ -266,6 +266,10 @@ public class GuiApp {
         updateWeather(listOfWeather);
     }
 
+    private void syncDate() {
+        newCalc.setDateSerial(newCalc.calculateDateSerial(year, month, day));
+    }
+    
     private void refreshGui() {
         primaryStage.setTitle(Localization.get("title"));
 
@@ -300,7 +304,7 @@ public class GuiApp {
 
         weatherData.setText(text);
         miscTextBox.setText(test.getOther());
-        drawGraph();
+        drawGraph(test);
     }
 
     public String getDaySeed() {
@@ -325,8 +329,7 @@ public class GuiApp {
         if (month > 12) { month -= 12; year++; }
         else if (month < 1) { month += 12; year--; }
 
-        newCalc.setDateSerial(newCalc.calculateDateSerial(year, month, day));
-
+        syncDate();
         nextComment();
     }
     
@@ -338,17 +341,21 @@ public class GuiApp {
 
     public void updateMonth(int in) {
         oldComment();
+
         month += in;
         if (month > 12) { month -= 12; year++; }
         else if (month < 1) { month += 12; year--; }
-        newCalc.setDateSerial(newCalc.calculateDateSerial(year, month, day));
+
+        syncDate();
         nextComment();
     }
 
     public void updateYear(int in) {
         oldComment();
+
         year += in;
-        newCalc.setDateSerial(newCalc.calculateDateSerial(year, month, day));
+
+        syncDate();
         nextComment();
     }
 
@@ -358,9 +365,9 @@ public class GuiApp {
         displayDay.setText(String.valueOf(day));
     }
 
-    private void drawGraph() {
+    private void drawGraph(Day daily) {
         double[][] hourly = newCalc.getHourlyWeather(year, month, day,
-                fileHandler.getNation(nation));
+                fileHandler.getNation(nation), daily);
         double[] temps = hourly[0];
         double[] winds = hourly[1];
         double[] rains = hourly[2];

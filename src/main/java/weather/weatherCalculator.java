@@ -42,7 +42,7 @@ public class weatherCalculator {
 
     public int daySeed(int year, int month, int day) {
         int sum = (year-1) * (12*28) + (month-1)*28 + day;
-        Logger.log(LogLevel.DEBUG, 1, "Dayseed is: " + sum);
+        Logger.log(LogLevel.INFO, 2, "Dayseed is: " + sum);
         return sum;
     }
     public int monthSeed(int year, int month) {
@@ -58,18 +58,19 @@ public class weatherCalculator {
 
     public double windStrengthYear(int year) {
         setYearSeed(yearSeed(year));
-        return randomBetweenFrom(yearRng, 0, 1);
+        return randomBetweenFrom(yearRng, -2, 4);
     }
     public double windStrengthMonth(int year, int month) {
         setMonthSeed(monthSeed(year, month));
-        return randomBetweenFrom(monthRng, 0, 1);
+        return randomBetweenFrom(monthRng, -2, 4);
     }
     public int windStrengthFractal(int year, int month, int windBonus) {
-        int dayStrength = obd6();
-        int yearStrength = (int) windStrengthYear(year);
+        //int dayStrength = obd6();
+        int dayStrength = (int) randomBetweenInt(0, 4);
+    	int yearStrength = (int) windStrengthYear(year);
         int monthStrength = (int) windStrengthMonth(year, month);
         int strength = (int) (dayStrength + yearStrength + monthStrength + windBonus + bonusWind());
-        Logger.log(LogLevel.DEBUG, 2, "Windstrength is... Year: " + yearStrength + " + Month: " + monthStrength + " + Day: " + dayStrength + " + bonus: " + windBonus + " = " + strength);
+        Logger.log(LogLevel.INFO, 2, "Windstrength is... Year: " + yearStrength + " + Month: " + monthStrength + " + Day: " + dayStrength + " + bonus: " + windBonus + " = " + strength);
         if (strength < 0) strength = 0;
         return strength;
     }
@@ -89,13 +90,36 @@ public class weatherCalculator {
     }
     private int bonusWind() { int t = bonusWind; bonusWind = 0; return t; }
 
+    /**
+     * This function returns a random double from between end and start.
+     * Note that it draws twice to improve randomness as I noticed a bug
+     * in the randomness that sometimes drew the same number far to many
+     * times in a row.
+     * @param rand
+     * @param start
+     * @param end
+     * @return
+     */
     public double randomBetweenFrom(Random rand, double start, double end) {
-        return (rand.nextDouble() * (end - start)) + start;
+        rand.nextDouble();
+    	return (rand.nextDouble() * (end - start)) + start;
     }
     public double randomBetween(double start, double end) {
-        return (rng.nextDouble() * (end - start)) + start;
+        return (rng.nextDouble() * end + 1 + start);
     }
-
+    
+    /**
+     * see discussion on randomBetweenFrom
+     * @param low
+     * @param high
+     * @return
+     */
+    public int randomBetweenInt(int low, int high) {
+        rng.nextInt();
+    	return rng.nextInt(high - low) + low +1;
+        //return rng.nextInt(high - low + 1) + low;
+    }
+    
     public double getProceduralTemperature(double prev, double cur, double next, int day) {
         double variance = randomBetween(-5, 5);
         if (day < 15) {
@@ -181,7 +205,8 @@ public class weatherCalculator {
         int next        = nation.getTemperature(month + 1);
         int averageWind = nation.getWind(month);
         int rain        = nation.getRain(month);
-        rng.setSeed(daySeed(year, month, day));
+//        rng.setSeed(daySeed(year, month, day));
+        rng = new Random(daySeed(year, month, day) * 31L + 7 + Math.abs(nation.getName().hashCode()));
         int wind = windStrengthFractal(year, month, averageWind);
         double temperature = getProceduralTemperature(previous, average, next, day);
         String events = generateEvents(nation.getEvents(), globalEvents, month, wind, temperature);
@@ -201,14 +226,16 @@ public class weatherCalculator {
      * @param nation the nation to generate the weather for
      * @return
      */
-    public double[][] getHourlyWeather(int year, int month, int day, Nation nation) {
-        Day daily = getWeather(year, month, day, nation);
+    public double[][] getHourlyWeather(int year, int month, int day, Nation nation, Day daily) {
+        // här borde vi istället bara hämta datan ur DAY. inte räkna om
+//    	Day daily = getWeather(year, month, day, nation);
         double dailyTemp = daily.getTemperature();
         int dailyWind    = daily.getWindStrength();
         int dailyRain    = daily.getRain();
 
-        Random hourRng = new Random(daySeed(year, month, day) * 31L + 7 + Math.abs(nation.getName().hashCode()));
-
+//        Random hourRng = new Random(daySeed(year, month, day) * 31L + 7 + Math.abs(nation.getName().hashCode()));
+        Random hourRng = rng;
+        
         double[] temps = new double[24];
         double[] winds = new double[24];
         double[] rains = new double[24];
