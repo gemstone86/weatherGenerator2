@@ -5,16 +5,15 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import context.CommentHandler;
+import context.CommentLoader;
 import context.ImportantDatesLoader;
 import context.LogLevel;
 import context.Logger;
 import context.ReligiousDate;
 import context.SessionState;
 import context.TxtToYamlConverter;
-import context.calendarLoader;
+import context.CalendarLoader;
 import context.fileHandler;
-import date.Calendar;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import gui.GuiApp;
@@ -71,13 +70,13 @@ public class Launcher extends Application {
         calculator.setReligiousDates(importantDates);
 
         Logger.log(LogLevel.INFO, 0, "Step 7: Loading comments");
-        CommentHandler commentHandler = new CommentHandler(path);
+        CommentLoader commentHandler = new CommentLoader(path);
         SessionState session = commentHandler.loadSession(start_year, start_month, start_day, nation);
 
         calculator.setDateSerial(calculator.calculateDateSerial(session.year, session.month, session.day));
 
         Logger.log(LogLevel.INFO, 0, "Step 4: Loading Calendar File");
-        List<Calendar> calendars = calendarLoader.load(path, calculator);
+        List<Calendar> calendars = CalendarLoader.load(path, calculator);
         calculator.setCalendars(calendars);
         
         // Apply saved language using string — avoids any enum casting issues in bytecode

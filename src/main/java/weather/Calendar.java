@@ -1,7 +1,6 @@
-package date;
+package weather;
 
 import gui.Localization;
-import weather.weatherCalculator;
 
 public class Calendar {
 
@@ -56,6 +55,18 @@ public class Calendar {
         return date;
     }
 
+    public String getMoonPhase(int serial) {
+        int phase = ((serial - 1) % 28) / 7 + 1;
+
+        switch (phase) {
+            case 1: return Localization.get("moon.phase.1");
+            case 2: return Localization.get("moon.phase.2");
+            case 3: return Localization.get("moon.phase.3");
+            case 4: return Localization.get("moon.phase.4");
+            default: return Localization.get("moon.phase.0");
+        }
+    }
+    
     public String toString(int serial) {
         int[] date = toDate(serial);
         StringBuilder sb = new StringBuilder();
@@ -63,12 +74,24 @@ public class Calendar {
             if (i > 0) sb.append("-");
             sb.append(date[i]);
         }
+        
+        //WHAT??!
+        sb.append(" (" + getDayName(getDayFromSerial(serial)) + ", " + getMoonPhase(serial)+")" );
+        
         return sb.toString();
     }
 
-    public String getDayName(int serial) {
+    public String getDayName(int i) {
+    	return Localization.get("day." + ((i % 7) + 1));
+    }
+    
+    public String getDayNameFromSerial(int serial) {
         int day = toDate(serial)[config.length - 1]; // last unit = day
-        return Localization.get("day." + ((day % 7) + 1));
+        return Localization.get("day." + (((day-1) % 7) + 1));
+    }
+    
+    public int getDayFromSerial(int serial) {
+    	return (((serial-1) % 7) + 1);
     }
 
 	public String getName() {

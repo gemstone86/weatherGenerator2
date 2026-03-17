@@ -19,14 +19,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import context.CommentHandler;
-import gui.Lang;
-import gui.Localization;
+import context.CommentLoader;
 import context.LogLevel;
 import context.Logger;
 import context.fileHandler;
-import date.Calendar;
 import weather.Nation;
+import weather.Calendar;
 import weather.Day;
 import weather.weatherCalculator;
 
@@ -53,11 +51,11 @@ public class GuiApp {
     String[] listOfNations;
 
     HashMap<String, String> comments = new HashMap<>();
-    CommentHandler commentHandler;
+    CommentLoader commentHandler;
 
     weatherCalculator newCalc;
 
-    Label calendarLabel, areaLabel, dateLabel, weatherLabel, miscLabel, commentLabel, dayLabel, monthLabel, yearLabel;
+    Label calendarLabel, areaLabel, dateLabel, weatherLabel, miscLabel, commentLabel, dayLabel, weekLabel, monthLabel, yearLabel;
     Button printToFile, langToggle;
     Stage primaryStage;
     TextField date;
@@ -69,11 +67,13 @@ public class GuiApp {
     static final int GRAPH_WIDTH = 400;
     static final int GRAPH_HEIGHT = 500;
     
+    private LinkedList<Day> listOfWeather;
+    TextField displayYear, displayMonth, displayDay;
     
 
     public GuiApp(fileHandler fileHandler, final LinkedList<Day> listOfWeather,
                   int start_year, int start_month, int start_day, String nation, Stage primaryStage,
-                  weatherCalculator newCalc, CommentHandler commentHandler) {
+                  weatherCalculator newCalc, CommentLoader commentHandler) {
 
         this.fileHandler = fileHandler;
         this.nation = nation;
@@ -83,6 +83,7 @@ public class GuiApp {
         this.newCalc = newCalc;
         this.commentHandler = commentHandler;
         this.primaryStage = primaryStage;
+        this.listOfWeather = listOfWeather;
 
         comments = commentHandler.load(this);
 
@@ -115,9 +116,15 @@ public class GuiApp {
         areaBox.setAlignment(Pos.CENTER);
 
         // ── Display fields ────────────────────────────────────────────────
-        TextField displayYear  = new TextField(String.valueOf(year));
-        TextField displayMonth = new TextField(String.valueOf(month));
-        TextField displayDay   = new TextField(String.valueOf(day));
+        displayYear  = new TextField(String.valueOf(year));
+        displayYear.setAlignment(Pos.CENTER);
+        
+        displayMonth = new TextField(String.valueOf(month));
+        displayMonth.setAlignment(Pos.CENTER);
+        
+        displayDay   = new TextField(String.valueOf(day));
+        displayDay.setAlignment(Pos.CENTER);
+        
         for (TextField tf : new TextField[]{displayYear, displayMonth, displayDay}) {
             tf.setPrefWidth(60);
             tf.setEditable(false);
@@ -149,6 +156,15 @@ public class GuiApp {
         VBox dayBox = new VBox(2, dayLabel, dayControls);
         dayBox.setAlignment(Pos.CENTER);
 
+        // ── Week controls ────────────────────────────────────────────────
+//        Button weekUp   = new Button("+");
+//        Button weelDown = new Button("-");
+//        weekLabel = new Label(Localization.get("label.week"));
+//        HBox weekControls = new HBox(4, dayDown, displayDay, dayUp);
+//        weekControls.setAlignment(Pos.CENTER);
+//        VBox weekBox = new VBox(2, dayLabel, dayControls);
+//        weekBox.setAlignment(Pos.CENTER);
+//        
         // ── Month controls ────────────────────────────────────────────────
         Button monthUp   = new Button("+");
         Button monthDown = new Button("-");
@@ -217,24 +233,21 @@ public class GuiApp {
         dropDownNations.setOnAction(e -> updateWeather(listOfWeather));
         calendarSystem.setOnAction(e -> updateDate());
 
-        yearUp.setOnAction(e ->    { updateYear(1);    updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather); });
-        yearDown.setOnAction(e ->  { updateYear(-1);   updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather); });
-        monthUp.setOnAction(e ->   { updateMonth(1);   updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather); });
-        monthDown.setOnAction(e -> { updateMonth(-1);  updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather); });
-        dayUp.setOnAction(e ->     { updateDay(1);     updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather); });
-        dayDown.setOnAction(e ->   { updateDay(-1);    updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather); });
+        yearUp.setOnAction(e -> { updateYear(1); refreshGui(); });
+        yearDown.setOnAction(e -> { updateYear(-1); refreshGui(); });
 
-        printToFile.setOnAction(e -> {
-            updateMonth(-1);
-            updateDisplays(displayYear, displayMonth, displayDay);
-            updateWeather(listOfWeather);
-        });
+        monthUp.setOnAction(e -> { updateMonth(1); refreshGui(); });
+        monthDown.setOnAction(e -> { updateMonth(-1); refreshGui(); });
 
-        langToggle.setOnAction(e -> {
-            Localization.setLangFromString(Localization.getLang() == Lang.SV ? "EN" : "SV");
-            refreshLabels();
-            updateWeather(listOfWeather);
-        });
+        dayUp.setOnAction(e -> { updateDay(1); refreshGui(); });
+        dayDown.setOnAction(e -> { updateDay(-1); refreshGui(); });
+
+        dropDownNations.setOnAction(e -> refreshGui());
+        calendarSystem.setOnAction(e -> refreshGui());
+
+        printToFile.setOnAction(e -> {updateMonth(-1); updateDisplays(displayYear, displayMonth, displayDay); updateWeather(listOfWeather); });
+
+        langToggle.setOnAction(e -> { Localization.setLangFromString(Localization.getLang() == Lang.SV ? "EN" : "SV"); refreshGui(); });
 
         primaryStage.setOnCloseRequest(e -> {
             commentHandler.save(comments);
@@ -253,8 +266,9 @@ public class GuiApp {
         updateWeather(listOfWeather);
     }
 
-    private void refreshLabels() {
+    private void refreshGui() {
         primaryStage.setTitle(Localization.get("title"));
+
         areaLabel.setText(Localization.get("label.area"));
         dayLabel.setText(Localization.get("label.day"));
         monthLabel.setText(Localization.get("label.month"));
@@ -262,9 +276,14 @@ public class GuiApp {
         weatherLabel.setText(Localization.get("label.weather"));
         miscLabel.setText(Localization.get("label.misc"));
         commentLabel.setText(Localization.get("label.comment"));
+
         commentBox.setPromptText(Localization.get("prompt.comment"));
         printToFile.setText(Localization.get("button.printfile"));
         langToggle.setText(Localization.get("button.lang"));
+
+        updateDisplays(displayYear, displayMonth, displayDay);
+        updateDate();
+        updateWeather(listOfWeather);
     }
 
     public void updateWeather(LinkedList<Day> weatherList) {
@@ -298,14 +317,17 @@ public class GuiApp {
 
     public void updateDay(int in) {
         oldComment();
+
         day += in;
         if (day > 28) { day = 1;  month++; }
         else if (day < 1) { day = 28; month--; }
+
         if (month > 12) { month -= 12; year++; }
         else if (month < 1) { month += 12; year--; }
+
         newCalc.setDateSerial(newCalc.calculateDateSerial(year, month, day));
+
         nextComment();
-        updateDate();
     }
     
     public void updateDate() {
@@ -321,7 +343,6 @@ public class GuiApp {
         else if (month < 1) { month += 12; year--; }
         newCalc.setDateSerial(newCalc.calculateDateSerial(year, month, day));
         nextComment();
-        updateDate();
     }
 
     public void updateYear(int in) {
@@ -329,7 +350,6 @@ public class GuiApp {
         year += in;
         newCalc.setDateSerial(newCalc.calculateDateSerial(year, month, day));
         nextComment();
-        updateDate();
     }
 
     private void updateDisplays(TextField displayYear, TextField displayMonth, TextField displayDay) {

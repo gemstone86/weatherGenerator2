@@ -15,14 +15,14 @@ import java.util.regex.Pattern;
  * Keys are date strings (e.g. "2977-7-1"), values are comment strings.
  * Creates a backup of the previous comments.yaml to comments-bak.yaml before each save.
  */
-public class CommentHandler {
+public class CommentLoader {
 
     private final String commentsPath;
     private final String commentsBackupPath;
     private final String sessionPath;
     private GuiApp guiApp;
 
-    public CommentHandler(String basePath) {
+    public CommentLoader(String basePath) {
         this.commentsPath       = basePath + "/src/comments/comments.yaml";
         this.commentsBackupPath = basePath + "/src/comments/comments-bak.yaml";
         this.sessionPath        = basePath + "/src/comments/session.yaml";

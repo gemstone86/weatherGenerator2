@@ -53,6 +53,10 @@ public class Localization {
             case "tier.unholy":       return "Ohelig dag";
             case "tier.unholiest":    return "Oheligaste dag";
             case "label.calendar":    return "Kalender";
+            case "moon.phase.1":      return "Fullmåne";
+            case "moon.phase.2":      return "Avtagande måne";
+            case "moon.phase.3":      return "Nytändande måne";
+            case "moon.phase.4":      return "Växande måne";
             default:                  return "?" + key + "?";
         }
     }
@@ -88,6 +92,10 @@ public class Localization {
             case "tier.unholy":       return "Unholy Day";
             case "tier.unholiest":    return "Unholies Day";
             case "label.calendar":    return "Calender";
+            case "moon.phase.1":      return "Full moon";
+            case "moon.phase.2":      return "Waning moon";
+            case "moon.phase.3":      return "New moon";
+            case "moon.phase.4":      return "Waxing moon";
             default:                  return "?" + key + "?";
         }
     }

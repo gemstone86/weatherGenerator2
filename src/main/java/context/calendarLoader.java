@@ -1,7 +1,8 @@
 package context;
 
-import date.Calendar;
 import org.yaml.snakeyaml.Yaml;
+
+import weather.Calendar;
 import weather.weatherCalculator;
 
 import java.io.*;
@@ -10,7 +11,7 @@ import java.util.*;
 /**
  * Loads calendar definitions from src/data/eon.yaml.
  */
-public class calendarLoader {
+public class CalendarLoader {
 
     @SuppressWarnings("unchecked")
     public static List<Calendar> load(String basePath, weatherCalculator calculator) {
