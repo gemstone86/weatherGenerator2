@@ -1,6 +1,7 @@
-package weather;
+package date;
 
 import gui.Localization;
+import weather.weatherCalculator;
 
 public class Calendar {
 

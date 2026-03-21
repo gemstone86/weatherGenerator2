@@ -14,6 +14,8 @@ import context.SessionState;
 import context.TxtToYamlConverter;
 import context.CalendarLoader;
 import context.fileHandler;
+import date.Calendar;
+import date.Day;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import gui.GuiApp;

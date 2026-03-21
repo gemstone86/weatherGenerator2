@@ -1,6 +1,8 @@
-package weather;
+package date;
 
 import java.text.DecimalFormat;
+
+import weather.direction;
 
 public class Day {
 

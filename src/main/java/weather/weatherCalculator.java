@@ -3,6 +3,8 @@ package weather;
 import context.Logger;
 import context.LogLevel;
 import context.ReligiousDate;
+import date.Calendar;
+import date.Day;
 import gui.Localization;
 
 import java.util.LinkedList;

@@ -23,9 +23,9 @@ import context.CommentLoader;
 import context.LogLevel;
 import context.Logger;
 import context.fileHandler;
+import date.Calendar;
+import date.Day;
 import weather.Nation;
-import weather.Calendar;
-import weather.Day;
 import weather.weatherCalculator;
 
 public class GuiApp {
