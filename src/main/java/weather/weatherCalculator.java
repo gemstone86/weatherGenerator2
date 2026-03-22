@@ -13,8 +13,9 @@ import java.util.Random;
 
 public class weatherCalculator {
     Random rng;
-    Random yearRng = new Random();
+    Random yearRng  = new Random();
     Random monthRng = new Random();
+    Random weekRng  = new Random();
     int dateSerial;
     int bonusWind = 0, bonusRain = 0, bonusTemp = 0;
 
@@ -32,9 +33,11 @@ public class weatherCalculator {
     
     public void setGlobalEvents(List<GlobalEvent> events) { this.globalEvents = events; }
     public void setReligiousDates(List<ReligiousDate> dates) { this.religiousDates = dates; }
-    public void setYearSeed(int n) { yearRng.setSeed(n); }
+    public List<ReligiousDate> getReligiousDates() { return religiousDates; }
+    public void setYearSeed(int n)  { yearRng.setSeed(n); }
     public void setMonthSeed(int n) { monthRng.setSeed(n); }
-    public void setSeed(int n) { rng.setSeed(n); }
+    public void setWeekSeed(int n)  { weekRng.setSeed(n); }
+    public void setSeed(int n)      { rng.setSeed(n); }
 
     public int obd6() {
         int die = rng.nextInt(6) + 1;
@@ -61,18 +64,39 @@ public class weatherCalculator {
     public double windStrengthYear(int year) {
         setYearSeed(yearSeed(year));
         return randomBetweenFrom(yearRng, -2, 4);
+        //return randomBetweenFrom(yearRng, -2, 4);
     }
     public double windStrengthMonth(int year, int month) {
         setMonthSeed(monthSeed(year, month));
-        return randomBetweenFrom(monthRng, -2, 4);
+        return randomBetweenFrom(monthRng, -2, 2);
     }
-    public int windStrengthFractal(int year, int month, int windBonus) {
-        //int dayStrength = obd6();
-        int dayStrength = (int) randomBetweenInt(0, 4);
-    	int yearStrength = (int) windStrengthYear(year);
+    public int weekSeed(int year, int month, int day) {
+        // week 1 = days 1-7, week 2 = days 8-14, etc.
+        int week = (day - 1) / 7;
+        return (year - 1) * (12 * 4) + (month - 1) * 4 + week;
+    }
+    public double windStrengthWeek(int year, int month, int day) {
+        weekRng.setSeed(weekSeed(year, month, day));
+//        weekRng.nextDouble(); // discard first draw for better distribution
+//        return weekRng.nextDouble() * 4; // 0..4
+        return randomBetweenFrom(weekRng, -2, 4);
+    }
+    /**
+     * Fractal wind: year(-2..4) + month(-2..2) + week(0..4) + day(0..4) + bonus.
+     * Max theoretical: 4+2+4+4 = 14 (force 12 storm).
+     * A storm of strength 12 requires a very windy year AND month AND week AND day.
+     */
+    public int windStrengthFractal(int year, int month, int day, int windBonus) {
+        int dayStrength   = (int) randomBetweenInt(0, 4);
         int monthStrength = (int) windStrengthMonth(year, month);
-        int strength = (int) (dayStrength + yearStrength + monthStrength + windBonus + bonusWind());
-        Logger.log(LogLevel.INFO, 2, "Windstrength is... Year: " + yearStrength + " + Month: " + monthStrength + " + Day: " + dayStrength + " + bonus: " + windBonus + " = " + strength);
+        int weekStrength  = (int) windStrengthWeek(year, month, day);
+        int yearStrength  = (int) windStrengthYear(year);
+        int strength = dayStrength + yearStrength + monthStrength + weekStrength + windBonus + bonusWind();
+        Logger.log(LogLevel.INFO, 2, "Windstrength is... Year: " + yearStrength
+            + " + Month: " + monthStrength
+            + " + Week: " + weekStrength
+            + " + Day: " + dayStrength
+            + " + bonus: " + windBonus + " = " + strength);
         if (strength < 0) strength = 0;
         return strength;
     }
@@ -104,7 +128,7 @@ public class weatherCalculator {
      */
     public double randomBetweenFrom(Random rand, double start, double end) {
         rand.nextDouble();
-    	return (rand.nextDouble() * (end - start)) + start;
+    	return (rand.nextDouble() * (end - start)) + start+1;
     }
     public double randomBetween(double start, double end) {
         return (rng.nextDouble() * end + 1 + start);
@@ -209,7 +233,7 @@ public class weatherCalculator {
         int rain        = nation.getRain(month);
 //        rng.setSeed(daySeed(year, month, day));
         rng = new Random(daySeed(year, month, day) * 31L + 7 + Math.abs(nation.getName().hashCode()));
-        int wind = windStrengthFractal(year, month, averageWind);
+        int wind = windStrengthFractal(year, month, day, averageWind);
         double temperature = getProceduralTemperature(previous, average, next, day);
         String events = generateEvents(nation.getEvents(), globalEvents, month, wind, temperature);
         events = appendReligiousDates(events, year, month, day);

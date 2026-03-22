@@ -10,6 +10,8 @@ import java.util.*;
 
 public class fileHandler {
     String basePath;
+
+    public String getBasePath() { return basePath; }
     BufferedWriter bufferedWriter;
     LinkedList<Nation> listOfNations = new LinkedList<Nation>();
 
