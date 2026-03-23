@@ -91,7 +91,7 @@ public class Launcher extends Application {
 
         Logger.log(LogLevel.INFO, 0, "Step 9: Starting JavaFX GUI");
         new GuiApp(filehandler, list_of_weather, session.year, session.month, session.day,
-                   session.nation, primaryStage, calculator, commentHandler);
+                   session.nation, primaryStage, calculator, commentHandler, session.campaign);
     }
 
     public static void main(String[] args) {

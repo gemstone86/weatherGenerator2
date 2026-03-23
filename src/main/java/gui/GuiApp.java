@@ -61,6 +61,7 @@ public class GuiApp {
     CommentLoader commentHandler;
     CampaignLoader campaignLoader;
     String currentCampaign = null; // tracks the loaded campaign, independent of dropdown selection
+    Button newCampaignBtn;
 
     weatherCalculator newCalc;
 
@@ -86,7 +87,7 @@ public class GuiApp {
 
     public GuiApp(fileHandler fileHandler, final LinkedList<Day> listOfWeather,
                   int start_year, int start_month, int start_day, String nation, Stage primaryStage,
-                  weatherCalculator newCalc, CommentLoader commentHandler) {
+                  weatherCalculator newCalc, CommentLoader commentHandler, String initialCampaign) {
 
         this.fileHandler = fileHandler;
         this.nation = nation;
@@ -100,8 +101,6 @@ public class GuiApp {
 
         comments = commentHandler.load(this);
 
-        // CampaignLoader shares the same basePath as CommentLoader
-        // Extract basePath from commentHandler by reconstructing — simpler to pass through fileHandler
         String basePath = fileHandler.getBasePath();
         campaignLoader = new CampaignLoader(basePath);
 
@@ -220,7 +219,7 @@ public class GuiApp {
             campaignDropdown.getItems().add(c);
         campaignDropdown.getSelectionModel().selectFirst();
 
-        Button newCampaignBtn = new Button(Localization.get("button.newcampaign"));
+        newCampaignBtn = new Button(Localization.get("button.newcampaign"));
 
         HBox campaignHeader = new HBox(8, campaignLabel, campaignDropdown, newCampaignBtn);
         campaignHeader.setAlignment(Pos.CENTER_LEFT);
@@ -231,6 +230,22 @@ public class GuiApp {
         campaignNoteBox.setWrapText(true);
         campaignNoteBox.setVisible(false);
         campaignNoteBox.setManaged(false);
+
+        // ── Restore last campaign from session ────────────────────────────
+        if (initialCampaign != null && !initialCampaign.isBlank()
+                && campaignDropdown.getItems().contains(initialCampaign)) {
+            campaignDropdown.getSelectionModel().select(initialCampaign);
+            currentCampaign = initialCampaign;
+            campaignNotes = campaignLoader.load(initialCampaign);
+            campaignNoteBox.setVisible(true);
+            campaignNoteBox.setManaged(true);
+            // Restore this campaign's saved date
+            int[] cDate = campaignLoader.loadCampaignSession(initialCampaign);
+            if (cDate != null) {
+                year = cDate[0]; month = cDate[1]; day = cDate[2];
+                syncDate();
+            }
+        }
 
         VBox campaignArea = new VBox(4, campaignHeader, campaignNoteBox);
         campaignArea.setAlignment(Pos.BOTTOM_CENTER);
@@ -286,13 +301,12 @@ public class GuiApp {
         calendarSystem.setOnAction(e -> refreshGui());
 
         campaignDropdown.setOnAction(e -> {
-            // Flush current note text into the map first
-            if (currentCampaign != null)
+            // Flush and save the current campaign before switching
+            if (currentCampaign != null) {
                 campaignNotes.put(getDaySeed(), campaignNoteBox.getText());
-
-            // Save the previously loaded campaign to disk
-            if (currentCampaign != null)
                 campaignLoader.save(currentCampaign, campaignNotes);
+                campaignLoader.saveCampaignSession(currentCampaign, year, month, day);
+            }
 
             // Load the newly selected campaign
             String selected = getSelectedCampaign();
@@ -301,13 +315,21 @@ public class GuiApp {
                 campaignNotes = campaignLoader.load(selected);
                 campaignNoteBox.setVisible(true);
                 campaignNoteBox.setManaged(true);
+                // Restore this campaign's saved date if available
+                int[] cDate = campaignLoader.loadCampaignSession(selected);
+                if (cDate != null) {
+                    oldComment();
+                    year = cDate[0]; month = cDate[1]; day = cDate[2];
+                    syncDate();
+                    nextComment();
+                }
             } else {
                 campaignNotes.clear();
                 campaignNoteBox.setVisible(false);
                 campaignNoteBox.setManaged(false);
             }
             nextCampaignNote();
-            drawCalendar();
+            refreshGui();
         });
 
         newCampaignBtn.setOnAction(e -> {
@@ -333,10 +355,14 @@ public class GuiApp {
         primaryStage.setOnCloseRequest(e -> {
             commentHandler.save(comments);
             oldCampaignNote();
-            if (currentCampaign != null) campaignLoader.save(currentCampaign, campaignNotes);
+            if (currentCampaign != null) {
+                campaignLoader.save(currentCampaign, campaignNotes);
+                campaignLoader.saveCampaignSession(currentCampaign, year, month, day);
+            }
             Logger.log(LogLevel.DEBUG, 1, "saving area: " + dropDownNations.getValue());
             Logger.log(LogLevel.DEBUG, 1, "saving year-month-day: " + year + "-" + month + "-" + day);
-            commentHandler.saveSession(year, month, day, dropDownNations.getValue());
+            commentHandler.saveSession(year, month, day, dropDownNations.getValue(),
+                    currentCampaign != null ? currentCampaign : "");
         });
         updateDate();
 
@@ -346,6 +372,7 @@ public class GuiApp {
         primaryStage.show();
 
         nextComment();
+        nextCampaignNote();
         updateWeather(listOfWeather);
     }
 
@@ -393,6 +420,7 @@ public class GuiApp {
         campaignNoteBox.setPromptText(Localization.get("prompt.campaign"));
         printToFile.setText(Localization.get("button.printfile"));
         langToggle.setText(Localization.get("button.lang"));
+        newCampaignBtn.setText(Localization.get("button.newcampaign"));
 
         updateDisplays(displayYear, displayMonth, displayDay);
         updateDate();
@@ -689,16 +717,16 @@ public class GuiApp {
 
                 // Build cell label: day number + * for comment + c for campaign note
                 String commentKey = year + "-" + month + "-" + d;
-                boolean hasComment  = comments.containsKey(commentKey)
-                                   && !comments.get(commentKey).isBlank();
-                boolean hasCNote    = hasCampaign
-                                   && campaignNotes.containsKey(commentKey)
-                                   && !campaignNotes.get(commentKey).isBlank();
+                boolean hasComment = comments.containsKey(commentKey)
+                                  && !comments.get(commentKey).isBlank();
+                boolean hasCNote   = hasCampaign
+                                  && campaignNotes.containsKey(commentKey)
+                                  && !campaignNotes.get(commentKey).isBlank();
 
                 String cellLabel = String.valueOf(d);
-                if (hasComment && hasCNote)      cellLabel += "\n* c";
-                else if (hasComment)             cellLabel += "\n*";
-                else if (hasCNote)               cellLabel += "\nc";
+                if (hasComment && hasCNote)  cellLabel += "\n* c";
+                else if (hasComment)         cellLabel += "\n*";
+                else if (hasCNote)           cellLabel += "\nc";
 
                 gc.fillText(cellLabel, cellX + cellW / 2 - 5, rowY);
             }

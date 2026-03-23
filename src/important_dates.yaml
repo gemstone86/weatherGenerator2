@@ -46,6 +46,10 @@ religions:
         month: "2"
         day: "7"
   - name: "Vontartron"
+    holiest:
+      name: "Vontar-lozad"
+      month: 7
+      day: 11
     holy_days:
       - name: "åttondedag"
         repeat_days: 8

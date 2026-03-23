@@ -5,13 +5,15 @@ public class SessionState {
     public int month;
     public int day;
     public String nation;
-    public String lang; // stored as plain String "SV" or "EN" to avoid casting issues
+    public String lang;
+    public String campaign; // last active campaign, or empty string if none
 
-    public SessionState(int year, int month, int day, String nation, String lang) {
-        this.year   = year;
-        this.month  = month;
-        this.day    = day;
-        this.nation = nation;
-        this.lang   = lang;
+    public SessionState(int year, int month, int day, String nation, String lang, String campaign) {
+        this.year     = year;
+        this.month    = month;
+        this.day      = day;
+        this.nation   = nation;
+        this.lang     = lang;
+        this.campaign = campaign;
     }
 }

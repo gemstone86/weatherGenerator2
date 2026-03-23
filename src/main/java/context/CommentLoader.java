@@ -24,7 +24,7 @@ public class CommentLoader {
 
     public CommentLoader(String basePath) {
         this.commentsPath       = basePath + "/src/comments/comments.yaml";
-        this.commentsBackupPath = basePath + "/src/comments/comments-bak.yaml";
+        this.commentsBackupPath = basePath + "/src/comments/bak/comments-bak.yaml";
         this.sessionPath        = basePath + "/src/comments/session.yaml";
     }
 
@@ -140,14 +140,15 @@ public class CommentLoader {
 
     // ── Session state ────────────────────────────────────────────────────
 
-    public void saveSession(int year, int month, int day, String nation) {
+    public void saveSession(int year, int month, int day, String nation, String campaign) {
         ensureDir(sessionPath);
         try {
             String content = "year: " + year + "\n"
                            + "month: " + month + "\n"
                            + "day: " + day + "\n"
                            + "nation: \"" + nation + "\"\n"
-                           + "lang: " + Localization.getLang().name() + "\n";
+                           + "lang: " + Localization.getLang().name() + "\n"
+                           + "campaign: \"" + (campaign != null ? campaign : "") + "\"\n";
             Files.writeString(Path.of(sessionPath), content);
             Logger.log(LogLevel.INFO, 1, "Saved session state.");
         } catch (IOException e) {
@@ -160,12 +161,12 @@ public class CommentLoader {
         File file = new File(sessionPath);
         if (!file.exists()) {
             Logger.log(LogLevel.INFO, 1, "No session file found, using defaults.");
-            return new SessionState(defaultYear, defaultMonth, defaultDay, defaultNation, "SV");
+            return new SessionState(defaultYear, defaultMonth, defaultDay, defaultNation, "SV", "");
         }
 
         // Parse session.yaml line by line for same reason as comments
         int year = defaultYear, month = defaultMonth, day = defaultDay;
-        String nation = defaultNation, lang = "SV";
+        String nation = defaultNation, lang = "SV", campaign = "";
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
@@ -177,20 +178,21 @@ public class CommentLoader {
                 String k = parts[0].trim();
                 String v = parts[1].trim().replace("\"", "");
                 switch (k) {
-                    case "year"   -> year   = parseIntOrDefault(v, defaultYear);
-                    case "month"  -> month  = parseIntOrDefault(v, defaultMonth);
-                    case "day"    -> day    = parseIntOrDefault(v, defaultDay);
-                    case "nation" -> nation = v.isEmpty() ? defaultNation : v;
-                    case "lang"   -> lang   = v.isEmpty() ? "SV" : v;
+                    case "year"     -> year     = parseIntOrDefault(v, defaultYear);
+                    case "month"    -> month    = parseIntOrDefault(v, defaultMonth);
+                    case "day"      -> day      = parseIntOrDefault(v, defaultDay);
+                    case "nation"   -> nation   = v.isEmpty() ? defaultNation : v;
+                    case "lang"     -> lang     = v.isEmpty() ? "SV" : v;
+                    case "campaign" -> campaign = v;
                 }
             }
-            Logger.log(LogLevel.INFO, 1, "Loaded session: " + nation + " " + year + "-" + month + "-" + day + " [" + lang + "]");
+            Logger.log(LogLevel.INFO, 1, "Loaded session: " + nation + " " + year + "-" + month + "-" + day + " [" + lang + "] campaign=" + campaign);
         } catch (IOException e) {
             Logger.log(LogLevel.WARNING, 1, "Error loading session: " + e.getMessage());
             e.printStackTrace();
         }
 
-        return new SessionState(year, month, day, nation, lang);
+        return new SessionState(year, month, day, nation, lang, campaign);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────
