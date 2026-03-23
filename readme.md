@@ -33,6 +33,12 @@ the generator dynamically generates the temperature, wind conditions, the precip
 * 5: tungt regn / snöfall
 * 6: Hällregn / snöstorm
 
+### Moisture
+Moisture governs a few things, such as the chance that there is thunder, mist, and the temperature drop at night. a high moisture region doesnt drop as much during the night as low moisture region.
+
+### Shift
+not used for the time being
+
 ## Events
 there are many different events that can take place and some areas have vastly different events attributed to them.
 
