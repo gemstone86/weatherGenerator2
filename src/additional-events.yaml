@@ -2,6 +2,7 @@ events:
   - name: "Lätt Åska"
     occurs: 1
     days: 28
+    affected_by: "rain"
     bonus_wind: 0
     bonus_temp: 0
     bonus_rain: 0

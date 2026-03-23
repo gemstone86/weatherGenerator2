@@ -2,6 +2,10 @@ package weather;
 
 import context.Logger;
 import context.LogLevel;
+import context.ReligiousDate;
+import date.Calendar;
+import date.Day;
+import gui.Localization;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -9,19 +13,31 @@ import java.util.Random;
 
 public class weatherCalculator {
     Random rng;
-    Random yearRng = new Random();
-    Random monthRng = new Random();;
+    Random yearRng  = new Random();
+    Random monthRng = new Random();
+    Random weekRng  = new Random();
+    int dateSerial;
     int bonusWind = 0, bonusRain = 0, bonusTemp = 0;
 
-    // Global events loaded from additional-events.yaml
     private List<GlobalEvent> globalEvents = new java.util.ArrayList<>();
+    private List<ReligiousDate> religiousDates = new java.util.ArrayList<>();
+    private List<Calendar> calendars = new java.util.ArrayList<>();
+    
+    public weatherCalculator(Random rng) { 
+    	this.rng = rng; 
+    }
 
-    public weatherCalculator(Random rng) { this.rng = rng; }
-
+    public void setDateSerial(int serial) {
+    	dateSerial = serial;
+    }
+    
     public void setGlobalEvents(List<GlobalEvent> events) { this.globalEvents = events; }
-    public void setYearSeed(int n) { yearRng.setSeed(n); }
+    public void setReligiousDates(List<ReligiousDate> dates) { this.religiousDates = dates; }
+    public List<ReligiousDate> getReligiousDates() { return religiousDates; }
+    public void setYearSeed(int n)  { yearRng.setSeed(n); }
     public void setMonthSeed(int n) { monthRng.setSeed(n); }
-    public void setSeed(int n) { rng.setSeed(n); }
+    public void setWeekSeed(int n)  { weekRng.setSeed(n); }
+    public void setSeed(int n)      { rng.setSeed(n); }
 
     public int obd6() {
         int die = rng.nextInt(6) + 1;
@@ -31,7 +47,7 @@ public class weatherCalculator {
 
     public int daySeed(int year, int month, int day) {
         int sum = (year-1) * (12*28) + (month-1)*28 + day;
-        Logger.log(LogLevel.DEBUG, 1, "Dayseed is: " + sum);
+        Logger.log(LogLevel.INFO, 2, "Dayseed is: " + sum);
         return sum;
     }
     public int monthSeed(int year, int month) {
@@ -47,18 +63,40 @@ public class weatherCalculator {
 
     public double windStrengthYear(int year) {
         setYearSeed(yearSeed(year));
-        return randomBetweenFrom(yearRng, 0, 1);
+        return randomBetweenFrom(yearRng, -2, 4);
+        //return randomBetweenFrom(yearRng, -2, 4);
     }
     public double windStrengthMonth(int year, int month) {
         setMonthSeed(monthSeed(year, month));
-        return randomBetweenFrom(monthRng, 0, 1);
+        return randomBetweenFrom(monthRng, -2, 2);
     }
-    public int windStrengthFractal(int year, int month, int windBonus) {
-        int dayStrength = obd6();
-        int yearStrength = (int) windStrengthYear(year);
+    public int weekSeed(int year, int month, int day) {
+        // week 1 = days 1-7, week 2 = days 8-14, etc.
+        int week = (day - 1) / 7;
+        return (year - 1) * (12 * 4) + (month - 1) * 4 + week;
+    }
+    public double windStrengthWeek(int year, int month, int day) {
+        weekRng.setSeed(weekSeed(year, month, day));
+//        weekRng.nextDouble(); // discard first draw for better distribution
+//        return weekRng.nextDouble() * 4; // 0..4
+        return randomBetweenFrom(weekRng, -2, 4);
+    }
+    /**
+     * Fractal wind: year(-2..4) + month(-2..2) + week(0..4) + day(0..4) + bonus.
+     * Max theoretical: 4+2+4+4 = 14 (force 12 storm).
+     * A storm of strength 12 requires a very windy year AND month AND week AND day.
+     */
+    public int windStrengthFractal(int year, int month, int day, int windBonus) {
+        int dayStrength   = (int) randomBetweenInt(0, 4);
         int monthStrength = (int) windStrengthMonth(year, month);
-        int strength = (int) (dayStrength + yearStrength + monthStrength + windBonus + bonusWind());
-        Logger.log(LogLevel.DEBUG, 2, "Year: " + yearStrength + " + Month: " + monthStrength + " + Day: " + dayStrength + " + bonus: " + windBonus + " = " + strength);
+        int weekStrength  = (int) windStrengthWeek(year, month, day);
+        int yearStrength  = (int) windStrengthYear(year);
+        int strength = dayStrength + yearStrength + monthStrength + weekStrength + windBonus + bonusWind();
+        Logger.log(LogLevel.INFO, 2, "Windstrength is... Year: " + yearStrength
+            + " + Month: " + monthStrength
+            + " + Week: " + weekStrength
+            + " + Day: " + dayStrength
+            + " + bonus: " + windBonus + " = " + strength);
         if (strength < 0) strength = 0;
         return strength;
     }
@@ -78,13 +116,36 @@ public class weatherCalculator {
     }
     private int bonusWind() { int t = bonusWind; bonusWind = 0; return t; }
 
+    /**
+     * This function returns a random double from between end and start.
+     * Note that it draws twice to improve randomness as I noticed a bug
+     * in the randomness that sometimes drew the same number far to many
+     * times in a row.
+     * @param rand
+     * @param start
+     * @param end
+     * @return
+     */
     public double randomBetweenFrom(Random rand, double start, double end) {
-        return (rand.nextDouble() * (end - start)) + start;
+        rand.nextDouble();
+    	return (rand.nextDouble() * (end - start)) + start+1;
     }
     public double randomBetween(double start, double end) {
-        return (rng.nextDouble() * (end - start)) + start;
+        return (rng.nextDouble() * end + 1 + start);
     }
-
+    
+    /**
+     * see discussion on randomBetweenFrom
+     * @param low
+     * @param high
+     * @return
+     */
+    public int randomBetweenInt(int low, int high) {
+        rng.nextInt();
+    	return rng.nextInt(high - low) + low +1;
+        //return rng.nextInt(high - low + 1) + low;
+    }
+    
     public double getProceduralTemperature(double prev, double cur, double next, int day) {
         double variance = randomBetween(-5, 5);
         if (day < 15) {
@@ -115,11 +176,19 @@ public class weatherCalculator {
         }
     }
 
-    public String generateEvents(LinkedList<event> regionEvents, List<GlobalEvent> globalEvents, int month, int wind, double temperature) {
+    /*
+     * generates a list of events from the list of regionalEvents and list of globalEvents.
+     * @return a string of events that occurs on the given day.
+     */
+    public String generateEvents(LinkedList<GlobalEvent> regionEvents, List<GlobalEvent> globalEvents, int month, int wind, double temperature) {
         StringBuilder result = new StringBuilder();
-        Logger.log(LogLevel.DEBUG, 2, "Num of Global events " + globalEvents.size());
 
-        for (GlobalEvent e : globalEvents) {
+        // Merge and process uniformly
+        List<GlobalEvent> allEvents = new java.util.ArrayList<>(globalEvents);
+        allEvents.addAll(regionEvents);
+        Logger.log(LogLevel.DEBUG, 2, "Checking " + allEvents.size() + " events (" + globalEvents.size() + " global, " + regionEvents.size() + " regional)");
+
+        for (GlobalEvent e : allEvents) {
             Logger.log(LogLevel.DEBUG, 2, "Checking event: " + e.getName());
             if (e.conditionsMet(month, wind, temperature) && chance(e.getOccurs(), e.getDays())) {
                 int variantIdx = e.hasVariants() ? rng.nextInt(e.getVariantCount()) : 0;
@@ -131,16 +200,13 @@ public class weatherCalculator {
                 bonusRain += e.getBonusRain();
             }
         }
-        for (event e : regionEvents) {
-            Logger.log(LogLevel.DEBUG, 2, "Checking event: " + e.getName());
-            if (chance(1 + e.getOccurs(), e.getDays())) {
-                if (result.isEmpty()) result.append(e.getName());
-                else { result.append(", "); result.append(e.getName()); }
-            }
-        }
         return result.toString();
     }
 
+    /**
+     * returns a wind (or stream direction)
+     * @return a direction type object.
+     */
     private direction getNonRandomDirection() {
         switch (rng.nextInt(8)) {
             case 1: return direction.N;  case 2: return direction.NE;
@@ -151,64 +217,82 @@ public class weatherCalculator {
         }
     }
 
-    public weather getWeather(int year, int month, int day, nationData nation) {
+    /**
+     * this method generaes the weather for a single day.
+     * @param year the year of the weather
+     * @param month the month of the weather
+     * @param day the day of the weather
+     * @param nation the nation to generate the weather 
+     * @return
+     */
+    public Day getWeather(int year, int month, int day, Nation nation) {
         int previous    = nation.getTemperature(month - 1);
         int average     = nation.getTemperature(month);
         int next        = nation.getTemperature(month + 1);
         int averageWind = nation.getWind(month);
         int rain        = nation.getRain(month);
-        rng.setSeed(daySeed(year, month, day));
-        int wind = windStrengthFractal(year, month, averageWind);
+//        rng.setSeed(daySeed(year, month, day));
+        rng = new Random(daySeed(year, month, day) * 31L + 7 + Math.abs(nation.getName().hashCode()));
+        int wind = windStrengthFractal(year, month, day, averageWind);
         double temperature = getProceduralTemperature(previous, average, next, day);
         String events = generateEvents(nation.getEvents(), globalEvents, month, wind, temperature);
+        events = appendReligiousDates(events, year, month, day);
         temperature += bonusTemp;
         bonusTemp = 0;
-        return new weather(year, month, day, temperature, wind,
+        return new Day(year, month, day, temperature, wind,
                 rainfall(temperature, average, wind, rain), events,
                 getNonRandomDirection());
     }
 
     /**
-     * Generates 24 hourly values for temperature, wind, and rain for a given day.
-     * Uses a seeded RNG so the same day always produces the same hourly pattern.
-     * Returns a double[3][24] where [0]=temperature, [1]=wind, [2]=rain.
+     * generates the weather per an hourly basis.
+     * @param year
+     * @param month
+     * @param day
+     * @param nation the nation to generate the weather for
+     * @return
      */
-    public double[][] getHourlyWeather(int year, int month, int day, nationData nation) {
-        weather daily = getWeather(year, month, day, nation);
+    public double[][] getHourlyWeather(int year, int month, int day, Nation nation, Day daily) {
+        // här borde vi istället bara hämta datan ur DAY. inte räkna om
+//    	Day daily = getWeather(year, month, day, nation);
         double dailyTemp = daily.getTemperature();
         int dailyWind    = daily.getWindStrength();
         int dailyRain    = daily.getRain();
 
-        // Seed per day so results are deterministic
-        Random hourRng = new Random(daySeed(year, month, day) * 31L + 7 + Math.abs(nation.getName().hashCode()));
-
+//        Random hourRng = new Random(daySeed(year, month, day) * 31L + 7 + Math.abs(nation.getName().hashCode()));
+        Random hourRng = rng;
+        
         double[] temps = new double[24];
         double[] winds = new double[24];
         double[] rains = new double[24];
 
-        // Temperature: smooth sine-like curve peaking at hour 14, lowest at hour 4
-        // plus small seeded noise
+        // Base swing ±(3-5 degrees) + half the region's temperature_drop
+        // drop_speed: 0 = smooth sine, higher = sharper drop and longer cold spell
+        double baseSwing = 3.0 + hourRng.nextDouble() * 2.0;
+        double swing     = baseSwing + nation.getTemperatureDrop() / 2.0;
+        double dropSpeed = nation.getDropSpeed();
+        // exponent < 1 sharpens peaks and flattens troughs on a sine:
+        // we apply it to a normalised 0..1 version then restore sign
+        double exponent = 1.0 / (1.0 + dropSpeed / 3.0); // drop_speed=3 -> exp=0.5
         for (int h = 0; h < 24; h++) {
-            double angle = Math.PI * 2 * (h - 4) / 24.0;
-            double curve = Math.sin(angle) * 3.0; // ±3 degree swing
-            double noise = (hourRng.nextDouble() - 0.5) * 2.0; // ±1 noise
-            temps[h] = dailyTemp + curve + noise;
+            double angle = Math.PI * 2 * (h - 4) / 24.0; // trough at h=4, peak at h=16
+            double sinVal = Math.sin(angle);
+            // Apply exponent to absolute value, restore sign
+            // exponent < 1 makes the curve spend more time near the extremes
+            double shaped = Math.signum(sinVal) * Math.pow(Math.abs(sinVal), exponent);
+            double noise  = (hourRng.nextDouble() - 0.5) * 2.0;
+            temps[h] = dailyTemp + shaped * swing + noise;
         }
 
-        // Wind: random walk clamped around daily value
         double wind = dailyWind;
         for (int h = 0; h < 24; h++) {
             wind += (hourRng.nextDouble() - 0.5) * 2.0;
             wind = Math.max(0, Math.min(wind, dailyWind * 2.0 + 4));
-            // Drift back toward daily value
             wind += (dailyWind - wind) * 0.15;
             winds[h] = wind;
         }
 
-        // Rain: 0 if daily rain is 0, otherwise random variation around daily
-        if (dailyRain == 0) {
-            // All zeros
-        } else {
+        if (dailyRain > 0) {
             for (int h = 0; h < 24; h++) {
                 double r = dailyRain + (hourRng.nextDouble() - 0.5) * dailyRain * 0.8;
                 rains[h] = Math.max(0, r);
@@ -218,4 +302,48 @@ public class weatherCalculator {
         return new double[][]{ temps, winds, rains };
     }
 
+    private String appendReligiousDates(String events, int year, int month, int day) {
+        StringBuilder sb = new StringBuilder(events);
+        for (ReligiousDate rd : religiousDates) {
+            if (rd.matches(year, month, day)) {
+                String tierKey = switch (rd.tier) {
+                    case HOLIEST   -> "tier.holiest";
+                    case HOLY      -> "tier.holy";
+                    case UNHOLY    -> "tier.unholy";
+                    case UNHOLIEST -> "tier.unholiest";
+                };
+                String entry = rd.religion + " - " + Localization.get(tierKey) + ": " + rd.name;
+                if (sb.length() > 0) sb.append(", ");
+                sb.append(entry);
+            }
+        }
+        return sb.toString();
+    }
+    
+    public int getDateSerial() {
+    	return dateSerial;
+    }
+    public int calculateDateSerial(int year, int month, int day) {
+    	int calculate =(year-1) * (12*28) + (month-1)*28 + day; 
+    	Logger.log(LogLevel.DEBUG, 3, "dateSerial in is: " + year + "-"+month+"-"+day+"="+ calculate);
+    	return calculate;
+    }
+    
+    public void updateDateSerial(int i) {
+    	dateSerial += i;
+    	Logger.log(LogLevel.INFO, 2, "dateSerial is: " + getDateSerial());
+    }
+
+	public String getDate(Calendar current) {
+		// TODO Auto-generated method stub
+		return current.toString(dateSerial);
+		//return getYear() + "-" + getMonth() + "-" + getDay() + " (" + Localization.get("day." + ((getDay() % 7) + 1)) + ")";
+	}
+
+	public void setCalendars(List<Calendar> calendars) { this.calendars = calendars; }
+		// TODO Auto-generated method stub
+
+	public List<Calendar> getCalendars() {
+		return calendars;
+	}
 }

@@ -1,9 +1,8 @@
 package context;
 
 import org.yaml.snakeyaml.Yaml;
-
-import weather.event;
-import weather.nationData;
+import weather.GlobalEvent;
+import weather.Nation;
 
 import java.io.*;
 import java.text.DecimalFormat;
@@ -11,8 +10,10 @@ import java.util.*;
 
 public class fileHandler {
     String basePath;
+
+    public String getBasePath() { return basePath; }
     BufferedWriter bufferedWriter;
-    LinkedList<nationData> listOfNations = new LinkedList<nationData>();
+    LinkedList<Nation> listOfNations = new LinkedList<Nation>();
 
     public fileHandler(String Path) {
         this.basePath = Path;
@@ -20,11 +21,8 @@ public class fileHandler {
         initializeDataFiles();
     }
 
-    /**
-     * Read a single .yaml nation file and return a nationData object.
-     */
     @SuppressWarnings("unchecked")
-    public nationData readYamlFile(String path) {
+    public Nation readYamlFile(String path) {
         File file = new File(path);
         try (FileInputStream fis = new FileInputStream(file)) {
             Yaml yaml = new Yaml();
@@ -32,34 +30,49 @@ public class fileHandler {
 
             String nationName = (String) data.get("name");
 
-            // Temperature
             Map<String, Integer> tempMap = (Map<String, Integer>) data.get("temperature");
             int[] temperature = mapToMonthArray(tempMap);
 
-            // Precipitation
             Map<String, Integer> rainMap = (Map<String, Integer>) data.get("precipitation");
             int[] rainfall = mapToMonthArray(rainMap);
 
-            // Shift
             int shift = data.containsKey("shift") ? (int) data.get("shift") : 0;
+            int temperatureDrop = data.containsKey("temperature_drop") ? (int) data.get("temperature_drop") : 0;
+            double dropSpeed = data.containsKey("drop_speed") ? ((Number) data.get("drop_speed")).doubleValue() : 0.0;
 
-            // Wind
             Map<String, Integer> windMap = (Map<String, Integer>) data.get("wind");
             int[] windStrength = mapToMonthArray(windMap);
 
-            // Events
-            LinkedList<event> events = new LinkedList<>();
+            // Events — full GlobalEvent format, all fields optional
+            LinkedList<GlobalEvent> events = new LinkedList<>();
             if (data.containsKey("events")) {
                 List<Map<String, Object>> eventList = (List<Map<String, Object>>) data.get("events");
                 for (Map<String, Object> e : eventList) {
-                    String name = (String) e.get("name");
-                    int occurs = (int) e.get("occurs");
-                    int days = (int) e.get("days");
-                    events.add(new event(name, occurs, days));
+                    String name    = (String) e.get("name");
+                    int occurs     = getInt(e, "occurs", 1);
+                    int days       = getInt(e, "days", 365);
+                    int startMonth = getInt(e, "start_month", 0);
+                    int endMonth   = getInt(e, "end_month", 0);
+                    int minWind    = getInt(e, "min_wind", 0);
+                    int maxWind    = getInt(e, "max_wind", 999);
+                    int bonusWind  = getInt(e, "bonus_wind", 0);
+                    int bonusTemp  = getInt(e, "bonus_temp", 0);
+                    int bonusRain  = getInt(e, "bonus_rain", 0);
+                    double minTemp = getInt(e, "min_temp", -999);
+                    double maxTemp = getInt(e, "max_temp", 999);
+                    List<String> variants = new ArrayList<>();
+                    Object listField = e.get("list");
+                    if (listField instanceof List) {
+                        for (Object item : (List<?>) listField)
+                            if (item != null) variants.add(item.toString().trim());
+                    }
+                    events.add(new GlobalEvent(name, variants, occurs, days,
+                            startMonth, endMonth, minWind, maxWind,
+                            bonusWind, bonusTemp, bonusRain, minTemp, maxTemp));
                 }
             }
 
-            return new nationData(nationName, temperature, rainfall, shift, windStrength, events);
+            return new Nation(nationName, temperature, rainfall, shift, windStrength, events, temperatureDrop, dropSpeed);
 
         } catch (IOException e) {
             System.out.println("Couldn't read YAML file: " + path);
@@ -68,19 +81,21 @@ public class fileHandler {
         return null;
     }
 
+    private static int getInt(Map<String, Object> map, String key, int defaultVal) {
+        Object val = map.get(key);
+        if (val == null) return defaultVal;
+        return (int) val;
+    }
+
     private int[] mapToMonthArray(Map<String, Integer> map) {
         String[] keys = {"jan", "feb", "mar", "apr", "may", "jun",
                          "jul", "aug", "sep", "oct", "nov", "dec"};
         int[] arr = new int[12];
-        for (int i = 0; i < 12; i++) {
+        for (int i = 0; i < 12; i++)
             arr[i] = map.getOrDefault(keys[i], 0);
-        }
         return arr;
     }
 
-    /**
-     * Load all .yaml files from the data folder.
-     */
     public void initializeDataFiles() {
         String folderPath = basePath;
         File folder = new File(folderPath);
@@ -88,13 +103,12 @@ public class fileHandler {
 
         if (files == null || files.length == 0) {
             System.out.println("No YAML files found in " + folderPath);
-            System.out.println("Run the converter first to convert your .txt files to YAML.");
             return;
         }
 
         for (File f : files) {
-        	Logger.log(LogLevel.INFO, 3, "Loading: " + f.getName());
-            nationData nd = readYamlFile(f.getAbsolutePath());
+            Logger.log(LogLevel.INFO, 3, "Loading: " + f.getName());
+            Nation nd = readYamlFile(f.getAbsolutePath());
             if (nd != null) listOfNations.add(nd);
         }
     }
@@ -106,7 +120,7 @@ public class fileHandler {
         return list;
     }
 
-    public nationData getNation(String nation) {
+    public Nation getNation(String nation) {
         for (int i = 0; i < listOfNations.size(); i++)
             if (listOfNations.get(i).getName().equals(nation))
                 return listOfNations.get(i);
