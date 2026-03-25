@@ -5,6 +5,7 @@ import context.LogLevel;
 import context.ReligiousDate;
 import date.Calendar;
 import date.Day;
+import date.InfluxCalculator;
 import gui.Localization;
 
 import java.util.LinkedList;
@@ -22,6 +23,7 @@ public class weatherCalculator {
     private List<GlobalEvent> globalEvents = new java.util.ArrayList<>();
     private List<ReligiousDate> religiousDates = new java.util.ArrayList<>();
     private List<Calendar> calendars = new java.util.ArrayList<>();
+    private InfluxCalculator influxCalculator = null;
     
     public weatherCalculator(Random rng) { 
     	this.rng = rng; 
@@ -34,6 +36,8 @@ public class weatherCalculator {
     public void setGlobalEvents(List<GlobalEvent> events) { this.globalEvents = events; }
     public void setReligiousDates(List<ReligiousDate> dates) { this.religiousDates = dates; }
     public List<ReligiousDate> getReligiousDates() { return religiousDates; }
+    public void setInfluxLists(String[][] lists) { this.influxCalculator = new InfluxCalculator(lists); }
+    public InfluxCalculator getInfluxCalculator() { return influxCalculator; }
     public void setYearSeed(int n)  { yearRng.setSeed(n); }
     public void setMonthSeed(int n) { monthRng.setSeed(n); }
     public void setWeekSeed(int n)  { weekRng.setSeed(n); }
@@ -64,7 +68,6 @@ public class weatherCalculator {
     public double windStrengthYear(int year) {
         setYearSeed(yearSeed(year));
         return randomBetweenFrom(yearRng, -2, 4);
-        //return randomBetweenFrom(yearRng, -2, 4);
     }
     public double windStrengthMonth(int year, int month) {
         setMonthSeed(monthSeed(year, month));
@@ -77,9 +80,8 @@ public class weatherCalculator {
     }
     public double windStrengthWeek(int year, int month, int day) {
         weekRng.setSeed(weekSeed(year, month, day));
-//        weekRng.nextDouble(); // discard first draw for better distribution
-//        return weekRng.nextDouble() * 4; // 0..4
-        return randomBetweenFrom(weekRng, -2, 4);
+        weekRng.nextDouble(); // discard first draw for better distribution
+        return weekRng.nextDouble() * 4; // 0..4
     }
     /**
      * Fractal wind: year(-2..4) + month(-2..2) + week(0..4) + day(0..4) + bonus.
@@ -88,9 +90,9 @@ public class weatherCalculator {
      */
     public int windStrengthFractal(int year, int month, int day, int windBonus) {
         int dayStrength   = (int) randomBetweenInt(0, 4);
+        int yearStrength  = (int) windStrengthYear(year);
         int monthStrength = (int) windStrengthMonth(year, month);
         int weekStrength  = (int) windStrengthWeek(year, month, day);
-        int yearStrength  = (int) windStrengthYear(year);
         int strength = dayStrength + yearStrength + monthStrength + weekStrength + windBonus + bonusWind();
         Logger.log(LogLevel.INFO, 2, "Windstrength is... Year: " + yearStrength
             + " + Month: " + monthStrength
@@ -128,7 +130,7 @@ public class weatherCalculator {
      */
     public double randomBetweenFrom(Random rand, double start, double end) {
         rand.nextDouble();
-    	return (rand.nextDouble() * (end - start)) + start+1;
+    	return (rand.nextDouble() * (end - start)) + start;
     }
     public double randomBetween(double start, double end) {
         return (rng.nextDouble() * end + 1 + start);

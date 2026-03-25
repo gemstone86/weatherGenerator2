@@ -189,7 +189,59 @@ public class CampaignLoader {
         return new int[]{year, month, day};
     }
 
-    // ── Path helpers ──────────────────────────────────────────────────────
+    /** Renames a campaign by moving its file. Returns false if newName already exists. */
+    public boolean renameCampaign(String oldName, String newName) {
+        File oldFile = campaignFile(oldName);
+        File newFile = campaignFile(newName);
+        if (newFile.exists()) {
+            Logger.log(LogLevel.WARNING, 1, "Rename failed — target already exists: " + newName);
+            return false;
+        }
+        boolean ok = oldFile.renameTo(newFile);
+        if (ok) {
+            // Also move session file if it exists
+            File oldSession = campaignSessionFile(oldName);
+            File newSession = campaignSessionFile(newName);
+            if (oldSession.exists()) oldSession.renameTo(newSession);
+            Logger.log(LogLevel.INFO, 1, "Renamed campaign: " + oldName + " → " + newName);
+        } else {
+            Logger.log(LogLevel.WARNING, 1, "Rename failed for: " + oldName);
+        }
+        return ok;
+    }
+
+    /**
+     * Deletes a campaign by moving its file to bak/ as a .deleted file.
+     * The session file is also removed.
+     */
+    public void deleteCampaign(String campaignName) {
+        File source  = campaignFile(campaignName);
+        File removed = new File(campaignDir + "/bak/" + safe(campaignName) + ".removed");
+        if (source.exists()) {
+            try {
+                removed.getParentFile().mkdirs();
+                boolean moved = false;
+                try {
+                    Files.move(source.toPath(), removed.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    moved = true;
+                } catch (IOException ex) {
+                    Logger.log(LogLevel.WARNING, 1, "Files.move failed, trying renameTo: " + ex.getMessage());
+                    moved = source.renameTo(removed);
+                }
+                if (moved) {
+                    Logger.log(LogLevel.INFO, 1, "Archived deleted campaign to: " + removed.getName());
+                } else {
+                    Logger.log(LogLevel.WARNING, 1, "Could not move campaign file to bak: " + source.getAbsolutePath());
+                }
+            } catch (Exception e) {
+                Logger.log(LogLevel.WARNING, 1, "Could not archive campaign file: " + e.getMessage());
+            }
+        } else {
+            Logger.log(LogLevel.WARNING, 1, "deleteCampaign: source file not found: " + source.getAbsolutePath());
+        }
+        File session = campaignSessionFile(campaignName);
+        if (session.exists()) session.delete();
+    }
 
     private File campaignFile(String name) {
         return new File(campaignDir + "/" + safe(name) + ".yaml");

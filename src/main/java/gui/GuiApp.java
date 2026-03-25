@@ -62,6 +62,8 @@ public class GuiApp {
     CampaignLoader campaignLoader;
     String currentCampaign = null; // tracks the loaded campaign, independent of dropdown selection
     Button newCampaignBtn;
+    Button renameCampaignBtn;
+    Button deleteCampaignBtn;
 
     weatherCalculator newCalc;
 
@@ -108,6 +110,11 @@ public class GuiApp {
         month = start_month;
         day = start_day;
 
+        primaryStage.getIcons().add(
+        	    new javafx.scene.image.Image(
+        	        getClass().getResourceAsStream("/icon.png")
+        	    )
+        	);
         primaryStage.setTitle(Localization.get("title"));
 
         // ── Nation selector ──────────────────────────────────────────────
@@ -219,9 +226,11 @@ public class GuiApp {
             campaignDropdown.getItems().add(c);
         campaignDropdown.getSelectionModel().selectFirst();
 
-        newCampaignBtn = new Button(Localization.get("button.newcampaign"));
+        newCampaignBtn    = new Button(Localization.get("button.newcampaign"));
+        renameCampaignBtn = new Button(Localization.get("button.renamecampaign"));
+        deleteCampaignBtn = new Button(Localization.get("button.deletecampaign"));
 
-        HBox campaignHeader = new HBox(8, campaignLabel, campaignDropdown, newCampaignBtn);
+        HBox campaignHeader = new HBox(8, campaignLabel, campaignDropdown, newCampaignBtn, renameCampaignBtn, deleteCampaignBtn);
         campaignHeader.setAlignment(Pos.CENTER_LEFT);
 
         campaignNoteBox = new TextArea();
@@ -346,6 +355,80 @@ public class GuiApp {
             });
         });
 
+        renameCampaignBtn.setOnAction(e -> {
+            if (currentCampaign == null) return;
+            TextInputDialog dialog = new TextInputDialog(currentCampaign);
+            dialog.setTitle(Localization.get("dialog.renamecampaign.title"));
+            dialog.setHeaderText(null);
+            dialog.setContentText(Localization.get("dialog.renamecampaign.prompt"));
+            dialog.showAndWait().ifPresent(newName -> {
+                if (newName.isBlank() || newName.equals(currentCampaign)) return;
+                // Flush and save current notes before rename
+                oldCampaignNote();
+                campaignLoader.save(currentCampaign, campaignNotes);
+                campaignLoader.saveCampaignSession(currentCampaign, year, month, day);
+                String oldName = currentCampaign;
+                if (campaignLoader.renameCampaign(oldName, newName)) {
+                    int idx = campaignDropdown.getItems().indexOf(oldName);
+                    campaignDropdown.getItems().set(idx, newName);
+                    currentCampaign = newName;
+                    campaignDropdown.getSelectionModel().select(newName);
+                }
+            });
+        });
+
+        deleteCampaignBtn.setOnAction(e -> {
+            if (currentCampaign == null) return;
+            String name = currentCampaign;
+
+            javafx.scene.control.Alert confirm = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.CONFIRMATION);
+            confirm.setTitle(Localization.get("dialog.deletecampaign.title"));
+            confirm.setHeaderText(Localization.get("dialog.deletecampaign.header") + " \"" + name + "\"?");
+
+            javafx.scene.control.ButtonType btnMerge  = new javafx.scene.control.ButtonType(Localization.get("dialog.deletecampaign.merge"));
+            javafx.scene.control.ButtonType btnDelete = new javafx.scene.control.ButtonType(Localization.get("dialog.deletecampaign.delete"));
+            javafx.scene.control.ButtonType btnCancel = new javafx.scene.control.ButtonType(
+                    Localization.get("dialog.deletecampaign.cancel"),
+                    javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
+            confirm.getButtonTypes().setAll(btnMerge, btnDelete, btnCancel);
+
+            confirm.showAndWait().ifPresent(result -> {
+                if (result == btnCancel) return;
+
+                // Flush current notes into map
+                oldCampaignNote();
+
+                if (result == btnMerge) {
+                    // Merge campaign notes into the main comments map
+                    for (java.util.Map.Entry<String, String> entry : campaignNotes.entrySet()) {
+                        if (entry.getValue() == null || entry.getValue().isBlank()) continue;
+                        String existing = comments.getOrDefault(entry.getKey(), "");
+                        if (existing.isBlank()) {
+                            comments.put(entry.getKey(), entry.getValue());
+                        } else {
+                            comments.put(entry.getKey(), existing + "\n" + entry.getValue());
+                        }
+                    }
+                    nextComment();
+                }
+
+                // Clear state BEFORE touching the dropdown so setOnAction
+                // can't fire a save of the just-deleted campaign
+                currentCampaign = null;
+                campaignNotes.clear();
+                campaignNoteBox.setText("");
+                campaignNoteBox.setVisible(false);
+                campaignNoteBox.setManaged(false);
+
+                // Now safe to archive and update the dropdown
+                campaignLoader.deleteCampaign(name);
+                campaignDropdown.getItems().remove(name);
+                campaignDropdown.getSelectionModel().selectFirst();
+                drawCalendar();
+            });
+        });
+
         printToFile.setOnAction(e -> { updateMonth(-1); refreshGui(); });
         langToggle.setOnAction(e -> {
             Localization.setLangFromString(Localization.getLang() == Lang.SV ? "EN" : "SV");
@@ -421,6 +504,8 @@ public class GuiApp {
         printToFile.setText(Localization.get("button.printfile"));
         langToggle.setText(Localization.get("button.lang"));
         newCampaignBtn.setText(Localization.get("button.newcampaign"));
+        renameCampaignBtn.setText(Localization.get("button.renamecampaign"));
+        deleteCampaignBtn.setText(Localization.get("button.deletecampaign"));
 
         updateDisplays(displayYear, displayMonth, displayDay);
         updateDate();

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Random;
 import context.CommentLoader;
 import context.ImportantDatesLoader;
+import context.InfluxLoader;
 import context.LogLevel;
 import context.Logger;
 import context.ReligiousDate;
@@ -70,6 +71,10 @@ public class Launcher extends Application {
         Logger.log(LogLevel.INFO, 0, "Step 6: Loading Important Dates");
         List<ReligiousDate> importantDates = ImportantDatesLoader.load(path);
         calculator.setReligiousDates(importantDates);
+
+        Logger.log(LogLevel.INFO, 0, "Step 6b: Loading Influx Aspects");
+        String[][] influxLists = InfluxLoader.load(path);
+        calculator.setInfluxLists(influxLists);
 
         Logger.log(LogLevel.INFO, 0, "Step 7: Loading comments");
         CommentLoader commentHandler = new CommentLoader(path);
