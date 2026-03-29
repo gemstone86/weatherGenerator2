@@ -31,6 +31,7 @@ import context.ReligiousDate;
 import context.fileHandler;
 import date.Calendar;
 import date.Day;
+import date.InfluxCalculator;
 import weather.Nation;
 import weather.weatherCalculator;
 
@@ -77,7 +78,7 @@ public class GuiApp {
     Canvas graphCanvas;
     Canvas calendarCanvas;
     private int windowWidth = 900;
-    private int windowHeight = 600;
+    private int windowHeight = 750;
     static final int GRAPH_WIDTH  = 400;
     static final int GRAPH_HEIGHT = 500;
     static final int CAL_WIDTH    = 400;
@@ -109,12 +110,12 @@ public class GuiApp {
         year = start_year;
         month = start_month;
         day = start_day;
-
         primaryStage.getIcons().add(
         	    new javafx.scene.image.Image(
         	        getClass().getResourceAsStream("/icon.png")
         	    )
         	);
+        
         primaryStage.setTitle(Localization.get("title"));
 
         // ── Nation selector ──────────────────────────────────────────────
@@ -560,7 +561,13 @@ public class GuiApp {
     public void updateDate() {
         int idx = calendarSystem.getSelectionModel().getSelectedIndex();
         Calendar activeCalendar = newCalc.getCalendars().get(idx);
-        date.setText(activeCalendar.toString(newCalc.getDateSerial()));
+        int serial = newCalc.getDateSerial();
+
+        String influx = "";
+        InfluxCalculator ic = newCalc.getInfluxCalculator();
+        if (ic != null) influx = ic.getInfluxString(year, month, day, serial);
+
+        date.setText(activeCalendar.toString(serial, influx));
     }
 
     public void updateMonth(int in) {
