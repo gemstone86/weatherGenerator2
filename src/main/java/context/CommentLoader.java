@@ -24,11 +24,11 @@ public class CommentLoader {
 
     public CommentLoader(String basePath) {
         this.commentsPath       = basePath + "/src/comments/comments.yaml";
-        Logger.log(LogLevel.INFO, 2, this.commentsPath);
+        Logger.log(LogLevel.INFO, 2, "Path to comments is: " +this.commentsPath);
         this.commentsBackupPath = basePath + "/src/comments/bak/comments-bak.yaml";
-        Logger.log(LogLevel.INFO, 2, this.commentsBackupPath);
+        Logger.log(LogLevel.INFO, 2, "Backup Path is: " + this.commentsBackupPath);
         this.sessionPath        = basePath + "/src/comments/session.yaml";
-        Logger.log(LogLevel.INFO, 2, this.sessionPath);
+        Logger.log(LogLevel.INFO, 2, "Path to Session save is: " + this.sessionPath);
     }
 
     // ── Comments ────────────────────────────────────────────────────────
