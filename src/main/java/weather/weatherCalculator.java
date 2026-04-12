@@ -67,11 +67,11 @@ public class weatherCalculator {
 
     public double windStrengthYear(int year) {
         setYearSeed(yearSeed(year));
-        return randomBetweenFrom(yearRng, -2, 4);
+        return randomBetweenFrom(yearRng, -2, 3);
     }
     public double windStrengthMonth(int year, int month) {
         setMonthSeed(monthSeed(year, month));
-        return randomBetweenFrom(monthRng, -2, 2);
+        return randomBetweenFrom(monthRng, -2, 3);
     }
     public int weekSeed(int year, int month, int day) {
         // week 1 = days 1-7, week 2 = days 8-14, etc.
@@ -129,7 +129,7 @@ public class weatherCalculator {
      * @return
      */
     public double randomBetweenFrom(Random rand, double start, double end) {
-        rand.nextDouble();
+        rand.nextDouble(); //discard for better distribution
     	return (rand.nextDouble() * (end - start)) + start;
     }
     public double randomBetween(double start, double end) {
@@ -231,11 +231,11 @@ public class weatherCalculator {
         int previous    = nation.getTemperature(month - 1);
         int average     = nation.getTemperature(month);
         int next        = nation.getTemperature(month + 1);
-        int averageWind = nation.getWind(month);
+        int nationWindFromMonth = nation.getWind(month);
         int rain        = nation.getRain(month);
 //        rng.setSeed(daySeed(year, month, day));
         rng = new Random(daySeed(year, month, day) * 31L + 7 + Math.abs(nation.getName().hashCode()));
-        int wind = windStrengthFractal(year, month, day, averageWind);
+        int wind = windStrengthFractal(year, month, day, nationWindFromMonth);
         double temperature = getProceduralTemperature(previous, average, next, day);
         String events = generateEvents(nation.getEvents(), globalEvents, month, wind, temperature);
         events = appendReligiousDates(events, year, month, day);
